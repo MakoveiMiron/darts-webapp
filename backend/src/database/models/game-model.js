@@ -96,10 +96,10 @@ export default{
       const findSql = `SELECT * FROM games WHERE id = ?`;
       return new Promise((resolve, reject) => {
         db.get(findSql, [roomId], (err,row) => {
-          const sql1 = `UPDATE games SET player1_id = NULL`;
-          const sql2 = `UPDATE games SET player2_id = NULL`;
+          const sql1 = `UPDATE games SET player1_id = NULL WHERE id = ?`;
+          const sql2 = `UPDATE games SET player2_id = NULL WHERE id = ?`;
           if(row.player1_id === userId){
-            db.run(sql1, (err) => {
+            db.run(sql1, [roomId], (err) => {
               if(err)  reject(err)
               else{
                 resolve('Successfully left the room!')
@@ -107,7 +107,7 @@ export default{
             })
           }
           else if(row.player2_id === userId){
-            db.run(sql2, (err) => {
+            db.run(sql2, [roomId], (err) => {
               if(err)  reject(err)
               else{
                 resolve('Successfully left the room!')
