@@ -1,10 +1,10 @@
-import usersModel from "../database/models/users-model";
+import { createUser, getUserDataById} from "../database/models/users-model";
 
 export default {
     updateUser(payload){
-        return usersModel.createUser(payload);
+        return createUser(payload);
     },
     getUserDataById(payload){
-        return usersModel.getUserDataById(payload)
+        return getUserDataById(payload)
     }
 }

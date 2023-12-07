@@ -1,14 +1,26 @@
 import { nanoid } from "nanoid";
-import db from "../connection";
+import {db} from "../connection";
 
-export default{
-    createTable(){
+  let io;
+  function setIoGames(socketIo) {
+      io = socketIo;
+  }
+
+   function createGamesTable(){
         const sql = `CREATE TABLE IF NOT EXISTS games (
             id VARCHAR(16) PRIMARY KEY,
             player1_id TEXT UNIQUE DEFAULT NULL,
             player2_id TEXT UNIQUE DEFAULT NULL,
+            player1_points INTEGER DEFAULT 0,
+            player2_points INTEGER DEFAULT 0,
+            player_throwing TEXT,
+            sets_count INTEGER DEFAULT 0,
+            current_set INTEGER DEFAULT 0,
+            game_mode INTEGER DEFAULT 0,
+            host TEXT,
             FOREIGN KEY (player1_id) REFERENCES users(id),
-            FOREIGN KEY (player2_id) REFERENCES users(id)
+            FOREIGN KEY (player2_id) REFERENCES users(id),
+            FOREIGN KEY (host) REFERENCES users(id)
         )`;
         db.run(sql,(err) => {
             if(err){
@@ -16,21 +28,20 @@ export default{
                 throw err;
             }
         })
-    },
-    createGameRoom(roomId){
-        const sql = `INSERT INTO games (id) VALUES(?)`
+    }
+    function createGameRoom(roomId, gameMode, setCount, userId){
+        const sql = `INSERT INTO games (id, sets_count, game_mode, host) VALUES(?, ?, ?, ?)`
         return new Promise((resolve, reject) => {
-            db.run(sql,[roomId],(err) => {
+            db.run(sql,[roomId, setCount, gameMode, userId],(err) => {
                 if(err) reject(err);
                 else{
-                    resolve(roomId)
+                    resolve({roomId, gameMode, setCount})
                 }
             })
         })
-    },
+    }
 
-    deleteGameRoom(roomId) {
-        // Check if the room exists before attempting deletion
+   function deleteGameRoom(roomId) {
         const checkIdSql = `SELECT id FROM games WHERE id = ?`;
       
         return new Promise((resolve, reject) => {
@@ -53,9 +64,9 @@ export default{
           });
         });
       }
-      ,
+      
 
-    joinGameRoom(userId, roomId){
+   function joinGameRoom(userId, roomId){
         const checkIdSql = `SELECT * FROM games WHERE id = ?`;
 
         return new Promise((resolve, reject) => {
@@ -90,9 +101,9 @@ export default{
               }
             });
           });
-    },
+    }
 
-    leaveGameRoom(roomId, userId) {
+   function leaveGameRoom(roomId, userId) {
       const findSql = `SELECT * FROM games WHERE id = ?`;
       const updateSql = `UPDATE games SET player1_id = CASE WHEN player1_id = ? THEN NULL ELSE player1_id END, 
                                           player2_id = CASE WHEN player2_id = ? THEN NULL ELSE player2_id END
@@ -119,5 +130,13 @@ export default{
         });
       });
     }
+
+    export {
+      createGameRoom,
+      createGamesTable,
+      joinGameRoom,
+      leaveGameRoom,
+      deleteGameRoom,
+      setIoGames
+    }
     
-}

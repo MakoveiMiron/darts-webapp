@@ -1,5 +1,8 @@
 import Sqlite3 from 'sqlite3';
 import path from 'path';
+import { Server as SocketIOServer } from 'socket.io';
+import http from 'http';
+import { FRONTEND_URL } from '../constants';
 
 Sqlite3.verbose();
 
@@ -30,6 +33,14 @@ Sqlite3.Database.prototype.runAsync = function (sql, params) {
   });
 };
 
+const server = http.createServer();
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: FRONTEND_URL,
+    credentials: true,
+  },
+});
+
 const db = new Sqlite3.Database(path.resolve('src', 'database', 'db', 'dartsapp.db'), (err) => {
   if (err) {
     console.log('Database connection error!');
@@ -38,4 +49,4 @@ const db = new Sqlite3.Database(path.resolve('src', 'database', 'db', 'dartsapp.
     console.log('Db connection successful');
   }
 });
-export default db;
+export { server, io, db };

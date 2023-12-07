@@ -1,8 +1,12 @@
 import { nanoid } from 'nanoid';
-import db from '../connection';
+import {db} from '../connection';
 
-export default {
-    createTable(){
+    let io;
+
+    function setIoUsers(socketIo) {
+        io = socketIo;
+    }
+    function createUsersTable(){
         const sql = `CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(16) PRIMARY KEY,
             email VARCHAR(32) NOT NULL UNIQUE,
@@ -18,9 +22,9 @@ export default {
                 throw err;
             }
         });
-    },
+    }
 
-    updateUser({email, passwordHash, username}){
+   function updateUser({email, passwordHash, username}){
         const id = nanoid(16);    
         const sql = `UPDATE users SET id = ?, email = ?, password_hash = ?, username = ?`;
         
@@ -32,9 +36,9 @@ export default {
                 }
             });
         });
-    },
+    }
 
-    getUserDataById({id}){
+   function getUserDataById({id}){
         const sql = `SELECT * FROM users WHERE id = ?`
         return new Promise((resolve,reject) => {
             db.get(sql,[id], (err, row) => {
@@ -44,8 +48,8 @@ export default {
                 }
             });
         });
-    },
-    createUser({email, passwordHash, username}){
+    }
+   function createUser({email, passwordHash, username}){
         const id = nanoid(16)
         const sql = `INSERT INTO users (id,email,password_hash,username) VALUES($id,$email,$passwordHash,$username)`
         const params = {$id: id, $email: email, $passwordHash: passwordHash, $username: username}
@@ -58,8 +62,8 @@ export default {
                 }
             });
         });
-    },
-    getEmail(email){
+    }
+   function getEmail(email){
         const sql = `SELECT * FROM users WHERE email = ?`
 
         return new Promise((resolve,reject) => {
@@ -76,4 +80,11 @@ export default {
         })
 
     }
-}
+    export {
+        createUsersTable,
+        updateUser,
+        getUserDataById,
+        createUser,
+        getEmail,
+        setIoUsers
+    }

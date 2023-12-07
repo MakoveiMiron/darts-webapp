@@ -4,9 +4,6 @@ import apiRouter from './routes/api-router';
 import authRouter from './routes/auth-router';
 import { FRONTEND_URL } from './constants';
 
-
-
-
 const app = express();
 
 app.use(

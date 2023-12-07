@@ -4,9 +4,14 @@ import { nanoid } from "nanoid";
 
 export default{
     createGameRoom(req,res,next){
+        let { gameMode, setCount, userId } = req.body
         let roomId = nanoid(16)
-        gameService.createGameRoom(roomId)
-        .then( gameRoom => res.status(200).send(gameRoom))
+        gameService.createGameRoom({roomId, gameMode, setCount, userId})
+        .then( data => {
+            gameService.joinGameRoom({roomId, userId})
+            .then(info => console.log('info'))
+            res.status(200).send(data.roomId)
+        })
         .catch(next)
     },
     
