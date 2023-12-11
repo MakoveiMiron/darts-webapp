@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [data, setData] = useState("");
+  const socket = io("http://localhost:8000");
+
+  useEffect(() => {
+    socket.on("serverResponse", (newData) => {
+      setData(newData);
+    });
+    return () => {
+      socket.off("serverResponse");
+    };
+  }, [socket]);
+
+  console.log(Object.values(data));
+  function handleClick(socket) {
+    socket.emit("create-room", {
+      gameMode: 701,
+      setCount: 7,
+      userId: "rw7r-lc9iYEkGQOE",
+    });
+  }
 
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        {typeof data === "object" ? undefined : (
+          <button onClick={() => handleClick(socket)}>Create Room</button>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div>
+        <ul>
+          {Object.values(data).map((value, index) => (
+            <li key={index}>{value}</li>
+          ))}
+        </ul>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
-
-export default App
