@@ -36,7 +36,7 @@ Sqlite3.Database.prototype.runAsync = function (sql, params) {
 const server = http.createServer();
 const io = new SocketIOServer(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
     credentials: true,
   },
 });

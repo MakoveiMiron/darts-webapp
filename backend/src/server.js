@@ -1,7 +1,7 @@
 import initDb from "./database/init";
 import { PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService } from "./services/games-service";
+import { createGameRoomService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService } from "./services/games-service";
 
 // Initialize the database and pass the io instance
 initDb(io);
@@ -9,15 +9,31 @@ initDb(io);
 // Handle Socket.IO connections
 io.on('connection', (socket) => {
   console.log(`Socket.IO client connected: ${socket.id}`);
-
-  // Handle events from Socket.IO clients if needed
-  socket.on('create-room', async  (data) => {
-    const result = await createGameRoomService(data);
-    console.log('Emitting serverResponse:', result);
-    socket.emit("serverResponse", result);
+  
+  socket.on('createRoom', async  (data) => {
+    const result = await createGameRoomService(data)
+    .catch(err => socket.emit('createRoomResponse', err));
+    socket.emit("createRoomResponse", result);
   });
 
-  // Add more Socket.IO event handlers as needed
+  socket.on('joinRoom', async (data) => {
+      const result = await joinGameRoomService({userId: data.userId, roomId: data.roomId})
+      .catch(err => socket.emit('joinRoomResponse', err));
+      socket.emit('joinRoomResponse', result)
+  });
+
+  socket.on('leaveRoom', async (data) => {
+    const result = await leaveGameRoomService({userId: data.userId, roomId: data.roomId})
+    .catch(err => socket.emit('leaveRoomResponse', err));
+    socket.emit('leaveRoomResponse', result)
+  });
+
+  socket.on('deleteRoom', async (data) => {
+    const result = await deleteGameRoomService(data.roomId)
+    .catch(err => socket.emit('deleteRoomResponse', err));
+    socket.emit('deleteRoomResponse', result)
+  });
+
 });
 
 server.listen(PORT, () => {
