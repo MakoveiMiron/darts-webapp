@@ -15,6 +15,8 @@ import {db} from "../connection";
             player2_points INTEGER DEFAULT 0,
             player_throwing TEXT,
             sets_count INTEGER DEFAULT 0,
+            legs_count INTEGER DEFAULT 0,
+            current_leg INTEGER DEFAULT 0,
             current_set INTEGER DEFAULT 0,
             game_mode INTEGER DEFAULT 0,
             host TEXT,
@@ -29,10 +31,10 @@ import {db} from "../connection";
             }
         })
     }
-    function createGameRoom(roomId, gameMode, setCount, userId){
-        const sql = `INSERT INTO games (id, sets_count, game_mode, host) VALUES(?, ?, ?, ?)`
+    function createGameRoom(roomId, gameMode, setCount, legCount, userId){
+        const sql = `INSERT INTO games (id, player1_points, player2_points, sets_count, legs_count,  game_mode, host) VALUES(?, ?, ?, ?, ?, ?, ?)`
         return new Promise((resolve, reject) => {
-            db.run(sql,[roomId, setCount, gameMode, userId],(err) => {
+            db.run(sql,[roomId, gameMode, gameMode, setCount, legCount, gameMode, userId],(err) => {
                 if(err) reject(err);
                 else{
                     resolve({roomId, gameMode, setCount})
@@ -132,7 +134,21 @@ import {db} from "../connection";
     }
 
     function startGame(roomId){
-      
+      const findSql = `SELECT player1_id FROM games WHERE id = ?`;
+      const sql = `UPDATE player_throwing WHERE player1_id = ?`
+      const player1_id = new Promise((resolve, reject) => {
+          db.get(findSql, [roomId], (err, row) =>{
+          if(err)reject(err)
+          else{resolve(row.player1_id)}
+        })
+      });
+
+      return new Promise((resolve, reject) => {
+        db.run(sql,[player1_id],(err) => {
+          if(err)reject(err)
+          else{resolve(`Player1 can start throwing!`)}
+        })
+      })
     }
 
 
@@ -142,6 +158,7 @@ import {db} from "../connection";
       joinGameRoom,
       leaveGameRoom,
       deleteGameRoom,
-      setIoGames
+      setIoGames,
+      startGame
     }
     

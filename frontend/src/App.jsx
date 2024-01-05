@@ -5,6 +5,7 @@ import {
   joinRoom,
   leaveRoom,
   deleteRoom,
+  startGame,
 } from "../utils/socketCalls";
 
 export default function App() {
@@ -26,6 +27,10 @@ export default function App() {
     });
 
     socket.on("deleteRoomResponse", (resp) => {
+      console.log(resp);
+    });
+
+    socket.on("startGameResponse", (resp) => {
       console.log(resp);
     });
 
@@ -56,6 +61,11 @@ export default function App() {
       <div>
         <button onClick={() => deleteRoom(socket, data, userId)}>
           Delete Room ({data.roomId})
+        </button>
+      </div>
+      <div>
+        <button onClick={() => startGame(socket, data, userId)}>
+          Start Game ({data.roomId})
         </button>
       </div>
       <div>

@@ -1,10 +1,10 @@
-import { createGameRoom, deleteGameRoom, joinGameRoom, leaveGameRoom} from "../database/models/game-model";
+import { createGameRoom, startGame, deleteGameRoom, joinGameRoom, leaveGameRoom} from "../database/models/game-model";
 import { nanoid } from "nanoid";
 
 
     async function createGameRoomService(payload){
         const roomId = nanoid(16)
-        const response = await createGameRoom(roomId, payload.gameMode, payload.setCount, payload.userId);
+        const response = await createGameRoom(roomId, payload.gameMode, payload.setCount, payload.legCount, payload.userId);
         console.log(response)
         return response
     } 
@@ -21,9 +21,14 @@ import { nanoid } from "nanoid";
         return leaveGameRoom(payload.roomId, payload.userId)
     }
 
+    function startGameService(payload){
+        return startGame(payload.roomId)
+    }
+
     export {
         createGameRoomService,
         deleteGameRoomService,
         joinGameRoomService,
-        leaveGameRoomService
+        leaveGameRoomService,
+        startGameService
     }

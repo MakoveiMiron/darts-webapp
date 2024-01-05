@@ -1,12 +1,13 @@
 import initDb from "./database/init";
 import { PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService } from "./services/games-service";
+import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService } from "./services/games-service";
+import { isRoomFull } from "./utils/isRoomFull";
+import app from "./app";
 
-// Initialize the database and pass the io instance
 initDb(io);
-
 // Handle Socket.IO connections
+
 io.on('connection', (socket) => {
   console.log(`Socket.IO client connected: ${socket.id}`);
   
@@ -34,8 +35,25 @@ io.on('connection', (socket) => {
     socket.emit('deleteRoomResponse', result)
   });
 
+  socket.on('startGame', async (data) => {
+    console.log(data.roomId)
+    const isFull = await isRoomFull(data.roomId);
+    console.log(isFull)
+    if(isFull){
+      const result = await startGameService(data.roomId)
+      socket.emit('startGameResponse', result)
+    }
+    else{
+      socket.emit('startGameResponse', `You don't have an opponent yet!`)
+    }
+  });
+
 });
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
+});
+
+app.listen(8001, () => {
+  console.log(`Server listening on ${8001}`);
 });

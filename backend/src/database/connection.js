@@ -3,6 +3,7 @@ import path from 'path';
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { FRONTEND_URL } from '../constants';
+import cors from 'cors'
 
 Sqlite3.verbose();
 

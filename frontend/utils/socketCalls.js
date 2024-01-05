@@ -2,6 +2,7 @@ export function createRoom(socket, data, userId) {
     socket.emit("createRoom", {
       gameMode: 701,
       setCount: 7,
+      legCount: 3,
       userId: userId,
     });
   }
@@ -23,6 +24,12 @@ export function createRoom(socket, data, userId) {
   export function deleteRoom(socket, data, userId) {
     socket.emit("deleteRoom", {
       userId: userId,
+      roomId: data.roomId,
+    });
+  }
+
+  export function startGame(socket, data) {
+    socket.emit("startGame", {
       roomId: data.roomId,
     });
   }
