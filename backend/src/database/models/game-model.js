@@ -131,6 +131,11 @@ import {db} from "../connection";
       });
     }
 
+    function startGame(roomId){
+      
+    }
+
+
     export {
       createGameRoom,
       createGamesTable,
