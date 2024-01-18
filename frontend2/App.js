@@ -2,7 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { HomeScreen, DetailsScreen } from './components/homeScreen';
+import HomeScreen from './components/homeScreen';
+import DetailsScreen from './components/detailsScreen';
 import React from "react"
 
 const Stack = createStackNavigator();

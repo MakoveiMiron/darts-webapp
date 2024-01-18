@@ -1,44 +1,27 @@
-import React from "react"
+import {React, useState} from "react"
 import { View, Text, Button, StyleSheet } from "react-native"
 import { useNavigation } from '@react-navigation/native';
 
 
-export function HomeScreen({route}){
-    const navigation = useNavigation()
-    const message = route.params?.message || "Default message";
-    
+export default function HomeScreen({route}){
+    const navigation = useNavigation();
+    const [name, setName] = useState("Miron")
+
+    function changeName(newName){
+        setName(newName)
+    }
+
     function handlePress(){
-        navigation.navigate('Details',{message:'navigated to details screen'})
+        navigation.navigate('Details', { changeName: changeName})
     }
 
     return ( 
     <View style={styles.root}>
         <View style={styles.container}>
-            <Text style={styles.text}>{message}</Text>
+            <Text style={styles.text}>{name}</Text>
             <Button 
-                onPress={() => navigation.navigate('Details', { message: "navigated to details" })}
-                title="go to details screen"
-            />
-        </View>
-    </View>
-    )
-}
-
-export function DetailsScreen({route}){
-    const navigation = useNavigation()
-    const message = route.params?.message || "Default message";
-    
-    function handlePress(){
-        navigation.navigate('Home',{message:'navigated to home screen'})
-    }
-
-    return ( 
-    <View style={styles.root}>
-        <View style={styles.container}>
-            <Text style={styles.text}>{message}</Text>
-            <Button 
-                onPress={() => navigation.navigate('Home', { message: "navigated to home" })} 
-                title="go to home screen"
+                onPress={handlePress}
+                title="change name"
             />
         </View>
     </View>
@@ -49,7 +32,7 @@ export function DetailsScreen({route}){
 const styles = StyleSheet.create({
     root:{
         backgroundColor:"coral",
-        flex:1,
+        flex:2,
     },
     container: {
         backgroundColor:"white",
