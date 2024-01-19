@@ -1,4 +1,4 @@
-import { createGameRoom, startGame, deleteGameRoom, joinGameRoom, leaveGameRoom} from "../database/models/game-model";
+import { createGameRoom, startGame, deleteGameRoom, joinGameRoom, leaveGameRoom, getGameRooms} from "../database/models/game-model";
 import { nanoid } from "nanoid";
 
 
@@ -25,10 +25,15 @@ import { nanoid } from "nanoid";
         return startGame(payload.roomId)
     }
 
+    function getGameRoomsService(){
+        return getGameRooms()
+    }
+
     export {
         createGameRoomService,
         deleteGameRoomService,
         joinGameRoomService,
         leaveGameRoomService,
-        startGameService
+        startGameService,
+        getGameRoomsService
     }

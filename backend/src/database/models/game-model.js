@@ -73,6 +73,7 @@ import {db} from "../connection";
 
         return new Promise((resolve, reject) => {
             db.get(checkIdSql, [roomId], (err, row) => {
+              console.log(row,userId,roomId)
                 
               if (err) {
                 reject(err);
@@ -151,6 +152,17 @@ import {db} from "../connection";
       })
     }
 
+    function getGameRooms(){
+      const sql = `SELECT * FROM games`
+      return new Promise(( resolve, reject) => {
+        db.all(sql,(err,rows)=>{
+          if(err) resolve(err)
+          resolve(rows)
+        })
+      })      
+   
+    }
+
 
     export {
       createGameRoom,
@@ -159,6 +171,7 @@ import {db} from "../connection";
       leaveGameRoom,
       deleteGameRoom,
       setIoGames,
-      startGame
+      startGame,
+      getGameRooms
     }
     

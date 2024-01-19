@@ -1,7 +1,7 @@
 import initDb from "./database/init";
 import { PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService } from "./services/games-service";
+import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
 import app from "./app";
 
@@ -18,6 +18,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('joinRoom', async (data) => {
+    console.log(data)
       const result = await joinGameRoomService({userId: data.userId, roomId: data.roomId})
       .catch(err => socket.emit('joinRoomResponse', err));
       socket.emit('joinRoomResponse', result)
@@ -48,12 +49,17 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('getGameRooms', async (data) =>{
+    const result = await getGameRoomsService()
+    socket.emit('getGameRoomsResponse', result)
+  })
+
 });
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-app.listen(8001, () => {
-  console.log(`Server listening on ${8001}`);
+server.listen(8001, () => {
+  console.log(`IO Server listening on ${8001}`);
 });
