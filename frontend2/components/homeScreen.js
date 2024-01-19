@@ -38,12 +38,6 @@ export default function HomeScreen({route}){
           console.log(resp)
         });
 
-        // socket.on("getGameRoomsResponse", (resp) => {
-        //     console.log("resp: ",resp)
-        //     setData(resp)
-        // })
-        
-        
         getGameRooms(socket);
               
         socket.on("getGameRoomsResponse", (resp) => {
