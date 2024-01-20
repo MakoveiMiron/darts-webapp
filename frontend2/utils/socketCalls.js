@@ -37,3 +37,7 @@ export function createRoom(socket, data, userId) {
   export function getGameRooms(socket) {
     socket.emit("getGameRooms")
   }
+
+  export function getUsername(socket, userId){
+    socket.emit('getUsername', { userId: userId })
+  }

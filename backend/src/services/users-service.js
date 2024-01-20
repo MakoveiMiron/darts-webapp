@@ -1,10 +1,9 @@
 import { createUser, getUserDataById} from "../database/models/users-model";
 
-export default {
-    updateUser(payload){
+
+    export function updateUserService(payload){
         return createUser(payload);
-    },
-    getUserDataById(payload){
+    }
+    export function getUserDataByIdService(payload){
         return getUserDataById(payload)
     }
-}

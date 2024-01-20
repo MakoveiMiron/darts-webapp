@@ -4,6 +4,7 @@ import { server, io } from "./database/connection";
 import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
 import app from "./app";
+import { getUserDataByIdService } from "./services/users-service";
 
 initDb(io);
 // Handle Socket.IO connections
@@ -18,10 +19,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('joinRoom', async (data) => {
-    console.log(data)
-      const result = await joinGameRoomService({userId: data.userId, roomId: data.roomId})
-      .catch(err => socket.emit('joinRoomResponse', err));
-      socket.emit('joinRoomResponse', result)
+    try {
+      const result = await joinGameRoomService({ userId: data.userId, roomId: data.roomId });
+      console.log('siker');
+      socket.emit('joinRoomResponse', result);
+    } catch (err) {
+      console.error(err);
+      let result = err
+      socket.emit('joinRoomResponse', result);
+    }
   });
 
   socket.on('leaveRoom', async (data) => {
@@ -52,6 +58,12 @@ io.on('connection', (socket) => {
   socket.on('getGameRooms', async (data) =>{
     const result = await getGameRoomsService()
     socket.emit('getGameRoomsResponse', result)
+  })
+
+  socket.on('getUsername', async (data) => {
+    const username = await getUserDataByIdService(data.userId)
+    console.log("username",username)
+    socket.emit('getUsernamesResponse', username)
   })
 
 });

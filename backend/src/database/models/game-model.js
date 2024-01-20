@@ -68,43 +68,63 @@ import {db} from "../connection";
       }
       
 
-   function joinGameRoom(userId, roomId){
+      function joinGameRoom(userId, roomId) {
         const checkIdSql = `SELECT * FROM games WHERE id = ?`;
-
         return new Promise((resolve, reject) => {
-            db.get(checkIdSql, [roomId], (err, row) => {
-              console.log(row,userId,roomId)
-                
-              if (err) {
-                reject(err);
-              } else if (row.player1_id !== null && row.player2_id !== null) {
-                resolve(`Room is full!`);
-              } else if(row.player1_id === null && row.player1_id !== userId && row.player2_id !== userId){
-                const joinSql = `UPDATE games SET player1_id = ? WHERE id = ?`;
-                db.run(joinSql, [userId,roomId], (joinErr) => {
-                  if (joinErr) {
-                    reject(`You are already in a room!`);
-                  } else {
-                    resolve(`Successfully joined the room!`);
-                  }
-                });
-              }
-              else if(row.player2_id === null && row.player2_id !== userId && row.player1_id !== userId){
-                const joinSql = `UPDATE games SET player2_id = ? WHERE id = ?`;
-                db.run(joinSql, [userId, roomId], (joinErr) => {
-                  if (joinErr) {
-                    reject(joinErr);
-                  } else {
-                    resolve(`Successfully joined the room!`);
-                  }
-                });
-              }
-              else{
-                reject("You are already joined to this room!")
-              }
-            });
+          db.get(checkIdSql, [roomId], async (err, row) => {
+            console.log(row, userId, roomId);
+      
+            if (err) {
+              reject(err);
+            } else if (row.player1_id !== null && row.player2_id !== null) {
+              resolve(`Room is full!`);
+            } else if (row.player1_id === null && row.player1_id !== userId && row.player2_id !== userId) {
+              const currentRoomId = await getCurrentRoom(userId);
+              console.log('current roomId', currentRoomId);
+              await leaveGameRoom(currentRoomId, userId);
+              const joinSql = `UPDATE games SET player1_id = ? WHERE id = ?`;
+              db.run(joinSql, [userId, roomId], function (joinErr) {
+                if (joinErr) {
+                  reject(`You are already in a room!`);
+                } else {
+                  // Fetch the updated row after the update operation
+                  const updatedRowSql = `SELECT * FROM games WHERE id = ?`;
+                  db.get(updatedRowSql, [roomId], (updatedRowErr, updatedRow) => {
+                    if (updatedRowErr) {
+                      reject(updatedRowErr);
+                    } else {
+                      resolve(updatedRow);
+                    }
+                  });
+                }
+              });
+            } else if (row.player2_id === null && row.player2_id !== userId && row.player1_id !== userId) {
+              const currentRoomId = await getCurrentRoom(userId);
+              console.log('current roomId', currentRoomId);
+              await leaveGameRoom(currentRoomId, userId);
+              const joinSql = `UPDATE games SET player2_id = ? WHERE id = ?`;
+              db.run(joinSql, [userId, roomId], function (joinErr) {
+                if (joinErr) {
+                  reject(joinErr);
+                } else {
+                  // Fetch the updated row after the update operation
+                  const updatedRowSql = `SELECT * FROM games WHERE id = ?`;
+                  db.get(updatedRowSql, [roomId], (updatedRowErr, updatedRow) => {
+                    if (updatedRowErr) {
+                      reject(updatedRowErr);
+                    } else {
+                      resolve(updatedRow);
+                    }
+                  });
+                }
+              });
+            } else {
+              reject('You are already joined to this room!');
+            }
           });
-    }
+        });
+      }
+      
 
    function leaveGameRoom(roomId, userId) {
       const findSql = `SELECT * FROM games WHERE id = ?`;
@@ -118,7 +138,7 @@ import {db} from "../connection";
             reject(err);
             return;
           }
-    
+          console.log(row)
           if (row.player1_id === userId || row.player2_id === userId) {
             db.run(updateSql, [userId, userId, roomId], (err) => {
               if (err) {
@@ -161,6 +181,16 @@ import {db} from "../connection";
         })
       })      
    
+    }
+
+    async function getCurrentRoom(userId){
+      const getCurrentSql = 'SELECT * FROM games WHERE player1_id = ? OR player2_id = ?';
+      return new Promise((resolve,reject) => {
+        db.get(getCurrentSql, [userId, userId], (err, row) => {
+          if(err) reject(err)
+          resolve(row.id)
+        });
+      })
     }
 
 
