@@ -11,7 +11,7 @@ export default function HomeScreen({route}){
     const [data, setData] = useState("")
     const [userId] = useState("rw7r-lc9iYEkGQOE")
 
-    const socket = io("http://localhost:8001")
+    const socket = io("http://192.168.2.149:8001")
 
     useEffect(() => {
         socket.on("createRoomResponse", (newData) => {
@@ -37,15 +37,11 @@ export default function HomeScreen({route}){
         socket.on("startGameResponse", (resp) => {
           console.log(resp)
         });
-
+ 
         getGameRooms(socket);
               
         socket.on("getGameRoomsResponse", (resp) => {
-          setData((prevData) => {
-            console.log("Previous Data:", prevData);
-            console.log("Updated Data:", resp);
-            return resp;
-          });
+          setData(resp);
         });
         
         return () => {
@@ -60,12 +56,30 @@ export default function HomeScreen({route}){
         joinRoom(socket, item, userId)
     }
     
-    function renderItem(item){
-        console.log("item: ", item)
+    function howManyJoined(item) {
+      const player1Joined = !!item.player1_id;
+      const player2Joined = !!item.player2_id;
+
+      if (player1Joined && player2Joined) {
+        return '2';
+      } else if (player1Joined || player2Joined) {
+        return '1';
+      } else {
+        return '0';
+      }
+    }
+    
+    function renderItem(item, idx){
         return (
             <View style = {styles.container}>
               <View style={styles.itemContainer}>
-                <Text style = {styles.itemText}>RoomId: {item.id}</Text>
+                <View style={styles.itemContainerHeader}>
+                  <Text>Room {idx}</Text>
+                  <Text>Joined {howManyJoined(item)}/2</Text>
+                </View>
+                <Text style = {styles.itemText}>Gamemode: {item.game_mode}</Text>
+                <Text style = {styles.itemText}>Sets count: {item.sets_count}</Text>
+                <Text style = {styles.itemText}>Legs count: {item.legs_count}</Text>
                 <Button 
                   style={styles.joinBtn} 
                   title = {"join room"} 
@@ -78,14 +92,14 @@ export default function HomeScreen({route}){
 
     return ( 
     <View style={styles.root}>
-      <View style = {styles.listContainer}>      
-        <FlatList
+      <Text style={styles.title}>Szobák:</Text>
+        <View style = {styles.listContainer}>      
+          <FlatList
             data = {data}
-            renderItem={({item}) => renderItem(item)}
-            //keyExtractor={(item) => item.id.toString()}
-            numColumns={4}
-        />
-      </View>
+            renderItem={({item, index}) => renderItem(item, index+1)}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        </View>
     </View>
     )
 }
@@ -96,38 +110,52 @@ const styles = StyleSheet.create({
     backgroundColor: "coral",
     flex: 1,
   },
+  title:{
+    marginTop:20,
+    textAlign:'center',
+    fontSize: 25,
+    color: 'white',
+    fontWeight: 'bold'
+  },
   listContainer:{
-    marginTop: 50,
+    marginTop: 20,
     marginLeft:50,
     marginRight:50,
+    marginBottom: 50,
   },
   container: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-between", // Adjust the alignment of items within a row
+    justifyContent: "space-between",
     marginBottom: 10,
-    marginRight: 10, // Add margin to create a gap between items in the same row
+    marginRight: 10,
     
   },
   itemContainer: {
     flex: 1,
     backgroundColor: "white",
     padding: 10,
-    borderRadius: 15, // Add border radius for rounded corners
+    borderRadius: 10,
   },
   itemText: {
     textAlign: "center",
     flex: 1,
     backgroundColor: "white",
     lineHeight: 40,
-    padding: 10,
   },
   list: {
-    paddingHorizontal: 10, // Adjust the horizontal padding for better spacing
-    paddingVertical: 10, // Add vertical padding for spacing between rows
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   joinBtn:{
     textAlign:"center",
     verticalAlign: "center",
+  },
+  itemContainerHeader:{
+    flex:2,
+    flexDirection:"row",
+    gap: 50,
+    marginLeft: "auto",
+    marginRight: "auto",
   }
 });

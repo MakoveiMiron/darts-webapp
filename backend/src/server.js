@@ -60,6 +60,6 @@ app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-server.listen(8001, () => {
-  console.log(`IO Server listening on ${8001}`);
+server.listen(8001, '192.168.2.149', () => {
+  console.log(`IO Server listening on  192.168.2.1:${8001}`);
 });
