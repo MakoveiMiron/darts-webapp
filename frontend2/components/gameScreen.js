@@ -12,9 +12,9 @@ export default function DetailsScreen({ route }) {
   const [player1Score, setPlayer1Score] = useState(501);
   const [player2Score, setPlayer2Score] = useState(501);
   const [isMyTurn, setIsMyTurn] = useState(true);
-  const [countdown, setCountdown] = useState(45);
+  const [countdown, setCountdown] = useState(10);
   const [modalVisible, setModalVisible] = useState(false);
-  const [opponentTime, setOpponentTime] = useState(45);
+  const [opponentTime, setOpponentTime] = useState(10);
   const [enteredScore, setEnteredScore] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
   const [socketConnection, setSocketConnection] = useState(false);
@@ -72,6 +72,7 @@ export default function DetailsScreen({ route }) {
         }
         setEnteredScore('');
         setIsMyTurn(false)
+        setCountdown(10)
       } else {
         console.error('Invalid score entered. Please enter a valid number.');
       }
@@ -80,22 +81,44 @@ export default function DetailsScreen({ route }) {
 
   useEffect(() => {
     if (gameStarted) {
-      const interval = setInterval(() => {
-        if (countdown > 0) {
-          setCountdown(countdown - 1);
-          if (!isMyTurn) {
-            setOpponentTime(opponentTime - 1);
+      if(isMyTurn){
+        const countdownInterval = setInterval(() => {
+          if (countdown > 0) {
+            setCountdown(countdown - 1);
+          } else {
+            handleCountdownEnd();
           }
-        } else {
-          setIsMyTurn(false);
-          clearInterval(interval);
-          setModalVisible(true);
-        }
-      }, 1000);
-
-      return () => clearInterval(interval);
+        }, 1000);
+        return () => {
+          clearInterval(countdownInterval);
+        };
+      }
+      else{
+      const opponentTimeInterval = setInterval(() => {
+          if (opponentTime > 0) {
+            setOpponentTime(opponentTime - 1);
+          } else if (opponentTime === 0) {
+            handleOpponentTurnEnd();
+          }
+        }, 1000);
+        return () => {
+          clearInterval(opponentTimeInterval);
+        };
+      }
     }
   }, [countdown, isMyTurn, opponentTime, gameStarted]);
+  
+  const handleOpponentTurnEnd = () => {
+    setIsMyTurn(true);
+    setCountdown(10);
+    setOpponentTime(10);
+  };
+
+  const handleCountdownEnd = () => {
+    setCountdown(10);
+    setOpponentTime(10);
+    setIsMyTurn(false);
+  };
 
   const closeModal = () => {
     setModalVisible(!modalVisible);
