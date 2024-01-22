@@ -1,0 +1,92 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+  }
+  
+  .game-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .player-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3498db;
+  }
+  
+  .player-info {
+    text-align: center;
+  }
+  
+  .player-text {
+    font-size: 24px;
+    color: #fff;
+  }
+  
+  .score-text {
+    font-size: 36px;
+    color: #fff;
+  }
+  
+  .actions-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .indicator-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .input {
+    width: 200px;
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .game-button {
+    background-color: #2ecc71;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .game-button:hover {
+    background-color: #27ae60;
+  }
+  
+  .countdown-container,
+  .opponent-time-container,
+  .start-game-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .countdown-text,
+  .opponent-time-text {
+    font-size: 18px;
+  }
+  
+  .player1 {
+    background-color: #e74c3c;
+  }
+  
+  .player2 {
+    background-color: #2ecc71;
+  }
+  
+  .low-score {
+    color: #e74c3c;
+  }
+  

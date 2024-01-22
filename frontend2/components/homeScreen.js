@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import io from "socket.io-client";
 import { getGameRooms, joinRoom } from "../utils/socketCalls";
+import { useHistory } from 'react-router-dom';
 
 export default function HomeScreen({ route }) {
   const navigation = useNavigation();
@@ -10,6 +11,7 @@ export default function HomeScreen({ route }) {
   const [roomsList, setRoomsList] = useState([]);
   const [userId] = useState("rw7r-lc9iYEkGQOE");
   const [socketConnection, setSocketConnection] = useState(false);
+  const history = useHistory();
 
   const socket = useRef(io("http://192.168.2.149:8001"));
 
@@ -61,6 +63,8 @@ export default function HomeScreen({ route }) {
 
   async function handlePress(item) {
     await joinRoom(socket.current, item, userId);
+    history.push('/game', { userIds: { userId1: item.player1_id, userId2: item.player2_id } });
+  }
   }
 
   function howManyJoined(item) {
