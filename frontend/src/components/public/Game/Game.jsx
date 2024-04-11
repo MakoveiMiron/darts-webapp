@@ -24,10 +24,11 @@ export default function Game() {
   const [userId_1, setUserId1] = useState(userId1);
   const [userId_2, setUserId2] = useState(userId2);
 
-  const socket = useRef(io("http://192.168.2.149:8001"));
+  const socket = useRef(io("http://192.168.2.250:8001"));
 
   useEffect(() => {
     async function getUsernames(userId1, userId2) {
+      
       if (userId1 !== null) {
         getUsername(socket.current, userId1);
       }
@@ -39,6 +40,7 @@ export default function Game() {
     getUsernames(userId_1, userId_2);
 
     const handleUsernameResponse = (resp) => {
+      
       if (resp.id === userId_1) {
         setUsername1(resp.username);
       }

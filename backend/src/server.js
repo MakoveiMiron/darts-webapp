@@ -1,5 +1,5 @@
 import initDb from "./database/init";
-import { PORT } from "./constants";
+import { FRONTEND_URL, IO_PORT, HTTP_PORT } from "./constants";
 import { server, io } from "./database/connection";
 import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
@@ -21,7 +21,6 @@ io.on('connection', (socket) => {
   socket.on('joinRoom', async (data) => {
     try {
       const result = await joinGameRoomService({ userId: data.userId, roomId: data.roomId });
-      console.log('siker');
       socket.emit('joinRoomResponse', result);
     } catch (err) {
       console.error(err);
@@ -45,7 +44,7 @@ io.on('connection', (socket) => {
   socket.on('startGame', async (data) => {
     console.log(data.roomId)
     const isFull = await isRoomFull(data.roomId);
-    console.log(isFull)
+    //console.log(isFull)
     if(isFull){
       const result = await startGameService(data.roomId)
       socket.emit('startGameResponse', result)
@@ -61,17 +60,17 @@ io.on('connection', (socket) => {
   })
 
   socket.on('getUsername', async (data) => {
-    const username = await getUserDataByIdService(data.userId)
-    console.log("username",username)
-    socket.emit('getUsernamesResponse', username)
+    const result = await getUserDataByIdService(data.userId)
+    socket.emit('getUsernamesResponse', result)
   })
 
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
+console.log("io", IO_PORT, "http", HTTP_PORT)
+app.listen(8000, () => {
+  console.log(`Server listening on ${8000}`);
 });
 
-server.listen(8001, '192.168.2.149', () => {
-  console.log(`IO Server listening on  192.168.2.1:${8001}`);
+server.listen(8001, '192.168.2.250', () => {
+  console.log(`IO Server listening on  192.168.2.250:${8001}`);
 });

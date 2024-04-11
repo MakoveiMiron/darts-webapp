@@ -8,6 +8,7 @@ export function createRoom(socket, data, userId) {
 }
 
 export function joinRoom(socket, data, userId) {
+  console.log('1', data)
   socket.emit("joinRoom", {
     userId: userId,
     roomId: data.id,

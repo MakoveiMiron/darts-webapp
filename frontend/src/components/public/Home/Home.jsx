@@ -9,7 +9,9 @@ export default function Home() {
   const [roomsList, setRoomsList] = useState([]);
   const [userId] = useState("rw7r-lc9iYEkGQOE");
   const [socketConnection, setSocketConnection] = useState(false);
-  const socket = useRef(io("http://192.168.2.149:8001"));
+  const socket = useRef(io("http://192.168.2.250:8001"));
+
+  //implement a navigation whih takes me to the game screen if im already joined one
 
   useEffect(() => {
     const handleCreateRoomResponse = (newData) => {
@@ -17,8 +19,11 @@ export default function Home() {
     };
 
     const handleJoinRoomResponse = (resp) => {
-      console.log("resp: ", resp);
+      console.log("2", resp)
       setSocketConnection((prevConnection) => !prevConnection);
+      navigate("/game", {
+        state: { userId1: resp.player1_id, userId2: resp.player2_id },
+      });
     };
 
     const handleLeaveRoomResponse = (resp) => {
@@ -57,20 +62,18 @@ export default function Home() {
   }, [socketConnection]);
 
   async function handlePress(item) {
-    await joinRoom(socket.current, item, userId);
-    navigate("/game", {
-      state: { userId1: item.player1_id, userId2: item.player2_id },
-    });
+   await joinRoom(socket.current, item, userId);
+    
   }
 
   function howManyJoined(item) {
-    if (item.player1_id === userId || item.player2_id === userId) return "2";
+    //if (item.player1_id === userId || item.player2_id === userId) return "2";
     const player1Joined = !!item.player1_id;
     const player2Joined = !!item.player2_id;
 
     if (player1Joined && player2Joined) {
       return "2";
-    } else if (player1Joined || player2Joined) {
+    } else if (player1Joined && !player2Joined) {
       return "1";
     } else {
       return "0";
@@ -100,7 +103,7 @@ export default function Home() {
               <td>{item.sets_count}</td>
               <td>{item.legs_count}</td>
               <td>
-                <button onClick={() => handlePress(item)}>Join Room</button>
+                {howManyJoined(item) == "2" ? <p>The room is full!</p> : <button onClick={() => handlePress(item)}>Join Room</button>}
               </td>
             </tr>
           ))}

@@ -72,7 +72,7 @@ import {db} from "../connection";
         const checkIdSql = `SELECT * FROM games WHERE id = ?`;
         return new Promise((resolve, reject) => {
           db.get(checkIdSql, [roomId], async (err, row) => {
-            console.log(row, userId, roomId);
+            
       
             if (err) {
               reject(err);
@@ -80,7 +80,6 @@ import {db} from "../connection";
               resolve(`Room is full!`);
             } else if (row.player1_id === null && row.player1_id !== userId && row.player2_id !== userId) {
               const currentRoomId = await getCurrentRoom(userId);
-              console.log('current roomId', currentRoomId);
               await leaveGameRoom(currentRoomId, userId);
               const joinSql = `UPDATE games SET player1_id = ? WHERE id = ?`;
               db.run(joinSql, [userId, roomId], function (joinErr) {
@@ -100,7 +99,6 @@ import {db} from "../connection";
               });
             } else if (row.player2_id === null && row.player2_id !== userId && row.player1_id !== userId) {
               const currentRoomId = await getCurrentRoom(userId);
-              console.log('current roomId', currentRoomId);
               await leaveGameRoom(currentRoomId, userId);
               const joinSql = `UPDATE games SET player2_id = ? WHERE id = ?`;
               db.run(joinSql, [userId, roomId], function (joinErr) {

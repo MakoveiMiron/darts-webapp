@@ -8,7 +8,7 @@ const app = express();
 app.use(
   cors({
     // frontend server, fetch-es cookie felkuldest akarunk hasznalni
-    origin: "*",
+    origin: FRONTED_URL,
     credentials: true,
   }),
 );
