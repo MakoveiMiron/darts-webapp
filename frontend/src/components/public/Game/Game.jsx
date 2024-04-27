@@ -29,7 +29,7 @@ export default function Game() {
   useEffect(() => {
     async function getUsernames(userId1, userId2) {
       
-      if (userId1 !== null) {
+      if (userId1 !== null) { 
         getUsername(socket.current, userId1);
       }
       if (userId2 !== null) {

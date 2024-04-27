@@ -11,6 +11,7 @@ import {db} from '../connection';
             id VARCHAR(16) PRIMARY KEY,
             email VARCHAR(32) NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
+            signed_in BOOLEAN DEFAULT FALSE,
             username VARCHAR(16) UNIQUE,
             is_admin BOOLEAN DEFAULT FALSE,
             inGame BOOLEAN DEFAULT FALSE,

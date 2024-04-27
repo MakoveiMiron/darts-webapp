@@ -1,4 +1,11 @@
-import gameService from "../services/games-service";
+import {
+    createGameRoomService,
+    deleteGameRoomService,
+    joinGameRoomService,
+    leaveGameRoomService,
+    startGameService,
+    getGameRoomsService
+} from "../services/games-service"
 import isRoomEmpty from "../utils/isRoomEmpty";
 import { nanoid } from "nanoid";
 
@@ -6,9 +13,10 @@ export default{
     createGameRoom(req,res,next){
         let { gameMode, setCount, userId } = req.body
         let roomId = nanoid(16)
-        gameService.createGameRoom({roomId, gameMode, setCount, userId})
+        createGameRoomService({roomId, gameMode, setCount, userId})
         .then( data => {
-            gameService.joinGameRoom({roomId, userId})
+            console.log(roomId, userId)
+            joinGameRoomService({roomId, userId})
             .then(info => console.log('info'))
             res.status(200).send(data.roomId)
         })
@@ -20,7 +28,7 @@ export default{
         let isEmpty = await isRoomEmpty(roomId)
         
         if(isEmpty){
-            gameService.deleteGameRoom(roomId)
+            deleteGameRoomService(roomId)
             .then((message) => res.status(200).send(message))
             .catch(next)
         }
@@ -33,7 +41,7 @@ export default{
         const { roomId } = req.params
         const { userId } = req.body
 
-        gameService.joinGameRoom({roomId, userId})
+        joinGameRoomService({roomId, userId})
         .then((data) => res.status(200).send(data))
         .catch(next);
     },
@@ -42,7 +50,7 @@ export default{
         const { roomId } = req.params;
         const { userId } = req.body;
 
-        gameService.leaveGameRoom({roomId,userId})
+        leaveGameRoomService({roomId,userId})
         .then((data) => res.status(200).send(data))
         .catch(next);
     }

@@ -1,0 +1,28 @@
+.nav-container {
+    background-color: #978b8b; /* Light background */
+    padding: 20px; /* Add some padding for spacing */
+  }
+  
+  .nav-list {
+    list-style-type: none; /* Remove bullet points from the list */
+    margin: 0;
+    padding: 0;
+    text-align: center; /* Center the list items */
+  }
+  
+  .nav-item {
+    padding: 10px;
+    background-color:#a2e6ad;
+    border-radius: 10px;
+    display: inline-block; /* Display list items horizontally */
+    margin-right: 20px; /* Add spacing between items */
+    font-size: 18px; /* Adjust font size */
+    color: #333; /* Text color */
+    cursor: pointer; /* Show cursor on hover */
+    transition: color 0.3s ease; /* Smooth transition for color change */
+  }
+  
+  .nav-item:hover {
+    color: #007bff; /* Change text color on hover */
+  }
+  

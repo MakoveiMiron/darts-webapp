@@ -3,8 +3,7 @@ import { nanoid } from "nanoid";
 
 
     async function createGameRoomService(payload){
-        const roomId = nanoid(16)
-        const response = await createGameRoom(roomId, payload.gameMode, payload.setCount, payload.legCount, payload.userId);
+        const response = await createGameRoom(payload.roomId, payload.gameMode, payload.setCount, payload.legCount, payload.userId);
         console.log(response)
         return response
     } 
