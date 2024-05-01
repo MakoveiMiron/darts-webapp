@@ -17,6 +17,7 @@ export default {
 
             if(!isValidPassword) throw new HttpError('Invalid email or password',400);
             const token = jwt.sign(user, JWT_SECRET_KEY, {expiresIn: '8h'})
+            console.log("token", token)
             return { accesToken: token}
         })
     },

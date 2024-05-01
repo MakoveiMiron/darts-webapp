@@ -33,14 +33,12 @@
     border: none;
     width: 90%;
     color: #fff;
-    background-color: var(--clr-light-brown);
     cursor: pointer;
     margin-bottom: 1rem;
+    background-color: rgb(56, 124, 137);
 }
-
-
 .login-button:hover{
-    background:#b99c45;
+    background-color: rgb(56, 124, 137);
 }
 
 .login-input:focus{

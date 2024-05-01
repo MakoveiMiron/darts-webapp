@@ -5,7 +5,7 @@ export default {
         const { email, password } = req.body 
         authService
             .login({email, password})
-            .then(({ accesToken }) => {
+            .then((accesToken) => {
                 res.status(200).send({ accesToken });
             })
             .catch(next)

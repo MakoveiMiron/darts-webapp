@@ -3,15 +3,19 @@ import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { getGameRooms, joinRoom } from "../../../../utils/socketCalls";
 import "./Home.css";
+import useAuth from '../../../hooks/useAuth';
 
 export default function Home() {
   const navigate = useNavigate();
   const [roomsList, setRoomsList] = useState([]);
-  const [userId] = useState("rw7r-lc9iYEkGQOE");
   const [socketConnection, setSocketConnection] = useState(false);
   const socket = useRef(io("http://192.168.2.250:8001"));
 
-  //implement a navigation whih takes me to the game screen if im already joined one
+
+  const { user } = useAuth()
+  const userId = user?.id
+  console.log(userId)
+  //check if loggeed in or not if yes continue if not goto login
 
   useEffect(() => {
     const handleCreateRoomResponse = (newData) => {

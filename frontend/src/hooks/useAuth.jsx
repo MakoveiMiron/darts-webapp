@@ -2,17 +2,20 @@ import { useContext } from "react";
 import AuthContext from "../contexts/authProvider";
 import authFetches from "../services/auth-fetch";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const useAuth = () => {
   const { auth, setAuth } = useContext(AuthContext);
-
+  const navigate = useNavigate()
   function login(formData) {
+    console.log("1")
     authFetches.userLogin(formData).then((resp) => {
-      setAuth((prev) => ({ ...prev, accessToken: resp.accessToken }));
-      localStorage.setItem("accessToken", resp.accessToken);
-      console.log("accessToken after login:", resp.accessToken);
+      console.log("frontend resp",resp)
+      setAuth((prev) => ({ ...prev, accessToken: resp.accesToken.accesToken }));
+      localStorage.setItem("accessToken", resp.accesToken.accesToken);
+      console.log("accessToken after login:", resp.accesToken);
       toast.success("Sikeres bejelentkezés");
-      // navigate('/');
+      navigate('/');
     });
   }
 
