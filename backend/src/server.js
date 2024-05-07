@@ -9,6 +9,11 @@ import { getUserDataByIdService } from "./services/users-service";
 initDb(io);
 // Handle Socket.IO connections
 
+const updateRoomsList = async () => {
+  const updatedRoomsList = await getGameRoomsService();
+  io.emit('roomsListUpdate', updatedRoomsList);
+};
+
 io.on('connection', (socket) => {
   console.log(`Socket.IO client connected: ${socket.id}`);
   
@@ -21,6 +26,7 @@ io.on('connection', (socket) => {
   socket.on('joinRoom', async (data) => {
     try {
       const result = await joinGameRoomService({ userId: data.userId, roomId: data.roomId });
+      updateRoomsList()
       socket.emit('joinRoomResponse', result);
     } catch (err) {
       console.error(err);
@@ -32,12 +38,14 @@ io.on('connection', (socket) => {
   socket.on('leaveRoom', async (data) => {
     const result = await leaveGameRoomService({userId: data.userId, roomId: data.roomId})
     .catch(err => socket.emit('leaveRoomResponse', err));
+    updateRoomsList()
     socket.emit('leaveRoomResponse', result)
   });
 
   socket.on('deleteRoom', async (data) => {
     const result = await deleteGameRoomService(data.roomId)
     .catch(err => socket.emit('deleteRoomResponse', err));
+    updateRoomsList()
     socket.emit('deleteRoomResponse', result)
   });
 
@@ -56,6 +64,7 @@ io.on('connection', (socket) => {
 
   socket.on('getGameRooms', async (data) =>{
     const result = await getGameRoomsService()
+    updateRoomsList();
     socket.emit('getGameRoomsResponse', result)
   })
 

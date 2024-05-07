@@ -18,7 +18,22 @@ export default function Home() {
   //check if loggeed in or not if yes continue if not goto login
 
   useEffect(() => {
-    const handleCreateRoomResponse = (newData) => {
+    const handleRoomsListUpdate = (resp) => {
+        const updatedRoomsList = resp
+        setRoomsList(updatedRoomsList);
+    };
+
+    socket.current.on('roomsListUpdate', handleRoomsListUpdate);
+
+    return () => {
+        socket.current.off('roomsListUpdate', handleRoomsListUpdate);
+    };
+}, [roomsList]);
+
+
+  useEffect(() => {
+    const handleCreateRoomResponse = (resp) => {
+      const newData = resp  
       setRoomsList(newData);
     };
 
@@ -43,7 +58,8 @@ export default function Home() {
     };
 
     const handleGetGameRoomsResponse = (resp) => {
-      setRoomsList(resp);
+        const roomList = resp
+        setRoomsList(roomList);
     };
 
     socket.current.on("createRoomResponse", handleCreateRoomResponse);
@@ -52,6 +68,7 @@ export default function Home() {
     socket.current.on("deleteRoomResponse", handleDeleteRoomResponse);
     socket.current.on("startGameResponse", handleStartGameResponse);
     socket.current.on("getGameRoomsResponse", handleGetGameRoomsResponse);
+    
 
     getGameRooms(socket.current);
 
@@ -62,8 +79,11 @@ export default function Home() {
       socket.current.off("deleteRoomResponse", handleDeleteRoomResponse);
       socket.current.off("startGameResponse", handleStartGameResponse);
       socket.current.off("getGameRoomsResponse", handleGetGameRoomsResponse);
+      
     };
   }, [socketConnection]);
+
+  
 
   async function handlePress(item) {
    await joinRoom(socket.current, item, userId);

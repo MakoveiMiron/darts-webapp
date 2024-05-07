@@ -81,7 +81,9 @@ import {db} from "../connection";
               resolve(`Room is full!`);
             } else if (row.player1_id === null && row.player1_id !== userId && row.player2_id !== userId) {
               const currentRoomId = await getCurrentRoom(userId);
-              await leaveGameRoom(currentRoomId, userId);
+              if(currentRoomId !== undefined){
+                await leaveGameRoom(currentRoomId, userId);
+              }
               const joinSql = `UPDATE games SET player1_id = ? WHERE id = ?`;
               db.run(joinSql, [userId, roomId], function (joinErr) {
                 if (joinErr) {
@@ -101,7 +103,6 @@ import {db} from "../connection";
             } else if (row.player2_id === null && row.player2_id !== userId && row.player1_id !== userId) {
               const currentRoomId = await getCurrentRoom(userId);
               if(currentRoomId !== undefined){
-
                 await leaveGameRoom(currentRoomId, userId);
               }
               const joinSql = `UPDATE games SET player2_id = ? WHERE id = ?`;
@@ -187,6 +188,7 @@ import {db} from "../connection";
 
     async function getCurrentRoom(userId){
       const getCurrentSql = 'SELECT * FROM games WHERE player1_id = ? OR player2_id = ?';
+      console.log("userid",userId)
       return new Promise((resolve,reject) => {
         db.get(getCurrentSql, [userId, userId], (err, row) => {
           console.log("row:", row)

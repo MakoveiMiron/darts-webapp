@@ -8,7 +8,7 @@ const app = express();
 app.use(
   cors({
     // frontend server, fetch-es cookie felkuldest akarunk hasznalni
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000' && 'http://localhost:3001',
     credentials: true,
   }),
 );

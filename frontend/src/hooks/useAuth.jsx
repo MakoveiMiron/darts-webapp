@@ -19,13 +19,20 @@ const useAuth = () => {
     });
   }
 
+  function register(formData){
+    authFetches.userRegister(formData).then((resp) => {
+      login(formData)
+      navigate("/")
+    })
+  }
+
   function logout() {
     localStorage.removeItem("accessToken");
     // Töröld a korábbi felhasználói adatokat is
     setAuth({ accessToken: null, user: null });
     toast.success("Kijelentkezve");
   }
-  return { ...auth, login, logout };
+  return { ...auth, login, logout, register };
 };
 
 export default useAuth;

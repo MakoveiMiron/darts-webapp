@@ -2,15 +2,14 @@ import useAuth from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom';
 import Home from '../components/public/Home/Home';
 export default function HomePage(){
-    const { user } = useAuth();
-    const userId = user?.id;
-
-    console.log(user, userId)
+    const accessToken = localStorage.getItem("accessToken");
     const navigate = useNavigate()
-    if(userId === undefined){
-       navigate('/user/login')
-    } 
+    console.log(accessToken)
+    if(accessToken === null){
+        navigate("/user/login")
+    }
     else{
         return <Home/>
     }
+
 }
