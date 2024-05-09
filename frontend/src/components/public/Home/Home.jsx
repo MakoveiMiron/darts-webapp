@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
+import { WebSocketContext } from "../../../contexts/Webprovider";
 import { useNavigate } from "react-router-dom";
-import io from "socket.io-client";
 import { getGameRooms, joinRoom } from "../../../../utils/socketCalls";
 import "./Home.css";
 import useAuth from '../../../hooks/useAuth';
@@ -8,13 +8,11 @@ import useAuth from '../../../hooks/useAuth';
 export default function Home() {
   const navigate = useNavigate();
   const [roomsList, setRoomsList] = useState([]);
-  const [socketConnection, setSocketConnection] = useState(false);
-  const socket = useRef(io("http://192.168.2.250:8001"));
+  const socket = useContext(WebSocketContext);
 
 
   const { user } = useAuth()
   const userId = user?.id
-  console.log(userId)
   //check if loggeed in or not if yes continue if not goto login
 
   useEffect(() => {
@@ -23,10 +21,10 @@ export default function Home() {
         setRoomsList(updatedRoomsList);
     };
 
-    socket.current.on('roomsListUpdate', handleRoomsListUpdate);
+    socket.on('roomsListUpdate', handleRoomsListUpdate);
 
     return () => {
-        socket.current.off('roomsListUpdate', handleRoomsListUpdate);
+        socket.off('roomsListUpdate', handleRoomsListUpdate);
     };
 }, [roomsList]);
 
@@ -39,9 +37,8 @@ export default function Home() {
 
     const handleJoinRoomResponse = (resp) => {
       console.log("2", resp)
-      setSocketConnection((prevConnection) => !prevConnection);
-      navigate("/game", {
-        state: { userId1: resp.player1_id, userId2: resp.player2_id },
+      navigate(`/game/${resp.id}`, {
+        state: { userId1: resp.player1_id, userId2: resp.player2_id, roomId: resp.id },
       });
     };
 
@@ -62,31 +59,31 @@ export default function Home() {
         setRoomsList(roomList);
     };
 
-    socket.current.on("createRoomResponse", handleCreateRoomResponse);
-    socket.current.on("joinRoomResponse", handleJoinRoomResponse);
-    socket.current.on("leaveRoomResponse", handleLeaveRoomResponse);
-    socket.current.on("deleteRoomResponse", handleDeleteRoomResponse);
-    socket.current.on("startGameResponse", handleStartGameResponse);
-    socket.current.on("getGameRoomsResponse", handleGetGameRoomsResponse);
+    socket.on("createRoomResponse", handleCreateRoomResponse);
+    socket.on("joinRoomResponse", handleJoinRoomResponse);
+    socket.on("leaveRoomResponse", handleLeaveRoomResponse);
+    socket.on("deleteRoomResponse", handleDeleteRoomResponse);
+    socket.on("startGameResponse", handleStartGameResponse);
+    socket.on("getGameRoomsResponse", handleGetGameRoomsResponse);
     
 
-    getGameRooms(socket.current);
+    getGameRooms(socket);
 
     return () => {
-      socket.current.off("createRoomResponse", handleCreateRoomResponse);
-      socket.current.off("joinRoomResponse", handleJoinRoomResponse);
-      socket.current.off("leaveRoomResponse", handleLeaveRoomResponse);
-      socket.current.off("deleteRoomResponse", handleDeleteRoomResponse);
-      socket.current.off("startGameResponse", handleStartGameResponse);
-      socket.current.off("getGameRoomsResponse", handleGetGameRoomsResponse);
+      socket.off("createRoomResponse", handleCreateRoomResponse);
+      socket.off("joinRoomResponse", handleJoinRoomResponse);
+      socket.off("leaveRoomResponse", handleLeaveRoomResponse);
+      socket.off("deleteRoomResponse", handleDeleteRoomResponse);
+      socket.off("startGameResponse", handleStartGameResponse);
+      socket.off("getGameRoomsResponse", handleGetGameRoomsResponse);
       
     };
-  }, [socketConnection]);
+  }, [socket]);
 
   
 
   async function handlePress(item) {
-   await joinRoom(socket.current, item, userId);
+   await joinRoom(socket, item, userId);
     
   }
 
@@ -97,7 +94,7 @@ export default function Home() {
 
     if (player1Joined && player2Joined) {
       return "2";
-    } else if (player1Joined && !player2Joined) {
+    } else if ((player1Joined && !player2Joined) || (!player1Joined && player2Joined)) {
       return "1";
     } else {
       return "0";

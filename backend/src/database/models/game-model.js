@@ -19,6 +19,8 @@ import {db} from "../connection";
             current_leg INTEGER DEFAULT 0,
             current_set INTEGER DEFAULT 0,
             game_mode INTEGER DEFAULT 0,
+            socketId1 TEXT,
+            socketId2 TEXT,
             host TEXT,
             FOREIGN KEY (player1_id) REFERENCES users(id),
             FOREIGN KEY (player2_id) REFERENCES users(id),
@@ -68,24 +70,23 @@ import {db} from "../connection";
       }
       
 
-      function joinGameRoom(userId, roomId) {
-        console.log("join room:" , roomId)
+      function joinGameRoom(userId, roomId, socketId) {
         const checkIdSql = `SELECT * FROM games WHERE id = ?`;
         return new Promise((resolve, reject) => {
           db.get(checkIdSql, [roomId], async (err, row) => {
-            
+            const currentRoomId = await getCurrentRoom(userId);
+            if(currentRoomId !== undefined){
+              await leaveGameRoom(currentRoomId, userId, socketId);
+            }
       
             if (err) {
               reject(err);
             } else if (row.player1_id !== null && row.player2_id !== null) {
               resolve(`Room is full!`);
             } else if (row.player1_id === null && row.player1_id !== userId && row.player2_id !== userId) {
-              const currentRoomId = await getCurrentRoom(userId);
-              if(currentRoomId !== undefined){
-                await leaveGameRoom(currentRoomId, userId);
-              }
-              const joinSql = `UPDATE games SET player1_id = ? WHERE id = ?`;
-              db.run(joinSql, [userId, roomId], function (joinErr) {
+              
+              const joinSql = `UPDATE games SET player1_id = ?, socketId1 = ? WHERE id = ?`;
+              db.run(joinSql, [userId, socketId, roomId], function (joinErr) {
                 if (joinErr) {
                   reject(`You are already in a room!`);
                 } else {
@@ -105,8 +106,8 @@ import {db} from "../connection";
               if(currentRoomId !== undefined){
                 await leaveGameRoom(currentRoomId, userId);
               }
-              const joinSql = `UPDATE games SET player2_id = ? WHERE id = ?`;
-              db.run(joinSql, [userId, roomId], function (joinErr) {
+              const joinSql = `UPDATE games SET player2_id = ?, socketId2 = ? WHERE id = ?`;
+              db.run(joinSql, [userId, socketId, roomId], function (joinErr) {
                 if (joinErr) {
                   reject(joinErr);
                 } else {
@@ -129,11 +130,16 @@ import {db} from "../connection";
       }
       
 
-   function leaveGameRoom(roomId, userId) {
+   function leaveGameRoom(roomId, userId, socketId) {
       const findSql = `SELECT * FROM games WHERE id = ?`;
-      const updateSql = `UPDATE games SET player1_id = CASE WHEN player1_id = ? THEN NULL ELSE player1_id END, 
-                                          player2_id = CASE WHEN player2_id = ? THEN NULL ELSE player2_id END
-                        WHERE id = ?`;
+      const updateSql = `UPDATE games 
+      SET 
+          player1_id = CASE WHEN player1_id = ? THEN NULL ELSE player1_id END, 
+          socketId1 = CASE WHEN player1_id = ? THEN NULL ELSE socketId1 END,
+          player2_id = CASE WHEN player2_id = ? THEN NULL ELSE player2_id END,
+          socketId2 = CASE WHEN player2_id = ? THEN NULL ELSE socketId2 END
+      WHERE 
+          id = ?`;
     
       return new Promise((resolve, reject) => {
         db.get(findSql, [roomId], (err, row) => {
@@ -143,7 +149,7 @@ import {db} from "../connection";
           }
           console.log(row)
           if (row.player1_id === userId || row.player2_id === userId) {
-            db.run(updateSql, [userId, userId, roomId], (err) => {
+            db.run(updateSql, [userId, userId, userId, userId, roomId], (err) => {
               if (err) {
                 reject(err);
               } else {
@@ -172,6 +178,16 @@ import {db} from "../connection";
           if(err)reject(err)
           else{resolve(`Player1 can start throwing!`)}
         })
+      })
+    }
+
+    function getGameRoom(roomId){
+      const sql = `SELECT * FROM games WHERE id = ?`
+      return new Promise((resolve, reject) => {
+          db.get(sql,[roomId], (err, row) => {
+              if(err) reject(err)
+              else{resolve(row)}
+          })
       })
     }
 
@@ -212,6 +228,7 @@ import {db} from "../connection";
       deleteGameRoom,
       setIoGames,
       startGame,
-      getGameRooms
+      getGameRooms,
+      getGameRoom
     }
     

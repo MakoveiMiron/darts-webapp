@@ -1,10 +1,10 @@
 import initDb from "./database/init";
 import { FRONTEND_URL, IO_PORT, HTTP_PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
+import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, getGameRoomDataService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
 import app from "./app";
-import { getUserDataByIdService } from "./services/users-service";
+import { getUserDataByIdService, getRoomUsersService } from "./services/users-service";
 
 initDb(io);
 // Handle Socket.IO connections
@@ -12,6 +12,13 @@ initDb(io);
 const updateRoomsList = async () => {
   const updatedRoomsList = await getGameRoomsService();
   io.emit('roomsListUpdate', updatedRoomsList);
+};
+
+const updateUserNamesForRoom = async (data) => {
+  console.log("1-data",data)
+  const result = await getRoomUsersService({userId1: data.player1_id, userId2: data.player2_id})
+    io.to(data.socketId1).emit('userNamesUpdate', result);
+    io.to(data.socketId2).emit('userNamesUpdate', result);
 };
 
 io.on('connection', (socket) => {
@@ -25,8 +32,11 @@ io.on('connection', (socket) => {
 
   socket.on('joinRoom', async (data) => {
     try {
-      const result = await joinGameRoomService({ userId: data.userId, roomId: data.roomId });
-      updateRoomsList()
+      const result = await joinGameRoomService({ userId: data.userId, roomId: data.roomId, socketId: data.socketId });
+      
+      const updatedUsernames = await getGameRoomDataService(data.roomId);
+      updateUserNamesForRoom(updatedUsernames)
+      updateRoomsList();
       socket.emit('joinRoomResponse', result);
     } catch (err) {
       console.error(err);
@@ -36,21 +46,24 @@ io.on('connection', (socket) => {
   });
 
   socket.on('leaveRoom', async (data) => {
-    const result = await leaveGameRoomService({userId: data.userId, roomId: data.roomId})
+    console.log("leaveroom",data)
+    const updatedUsernames = await getGameRoomDataService(data.roomId);
+    updateUserNamesForRoom(updatedUsernames)
+    const result = await leaveGameRoomService({userId: data.userId, roomId: data.roomId, socketId: data.socketId})
     .catch(err => socket.emit('leaveRoomResponse', err));
-    updateRoomsList()
+    updateRoomsList();
     socket.emit('leaveRoomResponse', result)
   });
 
   socket.on('deleteRoom', async (data) => {
     const result = await deleteGameRoomService(data.roomId)
     .catch(err => socket.emit('deleteRoomResponse', err));
-    updateRoomsList()
+    updateRoomsList();
+    updateUserNamesForRoom(data.roomId);
     socket.emit('deleteRoomResponse', result)
   });
 
   socket.on('startGame', async (data) => {
-    console.log(data.roomId)
     const isFull = await isRoomFull(data.roomId);
     //console.log(isFull)
     if(isFull){
@@ -68,9 +81,14 @@ io.on('connection', (socket) => {
     socket.emit('getGameRoomsResponse', result)
   })
 
+  socket.on('getUsernames', async (data) => {
+    const result = await getRoomUsersService({userId1: data.userId1, userId2: data.userId2})
+    io.to(data.socketId1).to(socketId2).emit("userNamesResponse",result)
+  })
+
   socket.on('getUsername', async (data) => {
-    const result = await getUserDataByIdService(data.userId)
-    socket.emit('getUsernamesResponse', result)
+    const result = await getUserDataByIdService({userId1: data.userId1})
+    socket.emit('getUsernameResponse', result)
   })
 
 });

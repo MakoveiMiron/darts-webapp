@@ -13,7 +13,7 @@ const useAuth = () => {
       console.log("frontend resp",resp)
       setAuth((prev) => ({ ...prev, accessToken: resp.accesToken.accesToken }));
       localStorage.setItem("accessToken", resp.accesToken.accesToken);
-      console.log("accessToken after login:", resp.accesToken);
+      console.log("accessToken after login:", auth);
       toast.success("Sikeres bejelentkezés");
       navigate('/');
     });

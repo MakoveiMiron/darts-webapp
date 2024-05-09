@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Game.css"; // Import your CSS file
-import { getUsername } from "../../../../utils/socketCalls";
-import { io } from "socket.io-client";
+import { getUsername, getUsernames, leaveRoom } from "../../../../utils/socketCalls";
 import { useLocation } from "react-router-dom";
+import { WebSocketContext } from "../../../contexts/Webprovider";
 
 export default function Game() {
   const location = useLocation();
-  const { userId1, userId2 } = location.state || {};
+  const { userId1, userId2, roomId } = location.state || {};
+  const navigate = useNavigate()
 
   const [currentPlayer, setCurrentPlayer] = useState("Player 1");
   const [currentSet, setCurrentSet] = useState(1);
@@ -18,43 +20,69 @@ export default function Game() {
   const [opponentTime, setOpponentTime] = useState(10);
   const [enteredScore, setEnteredScore] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
-  const [socketConnection, setSocketConnection] = useState(false);
   const [username1, setUsername1] = useState("");
   const [username2, setUsername2] = useState("");
-  const [userId_1, setUserId1] = useState(userId1);
-  const [userId_2, setUserId2] = useState(userId2);
+  // const [userId_1, setUserId1] = useState(userId1);
+  // const [userId_2, setUserId2] = useState(userId2);
 
-  const socket = useRef(io("http://192.168.2.250:8001"));
+  const socket = useContext(WebSocketContext);
+
+
+
+  //updating useeffect
+  useEffect(() => {
+    const handleUserNamesUpdate = async (resp) => {
+        const updatedUsernames = await resp
+        console.log("updated",updatedUsernames)
+        //getUsernames(socket, updatedUsernames.player1_id, updatedUsernames.player2_id, updatedUsernames.socketid1, updatedUsernames.socketId2);
+        setUsername1(updatedUsernames.username1)
+        setUsername2(updatedUsernames.username2)
+      };
+      
+      // const usernames = (resp) => {
+      //   setUsername1(resp.username1);
+      //   setUsername2(resp.username2);
+      // }
+
+    socket.on('userNamesUpdate', handleUserNamesUpdate);
+    //socket.on("getUsernamesResponse", usernames);
+
+    return () => {
+        socket.off('userNamesUpdate', handleUserNamesUpdate);
+        //socket.off("getUsernamesResponse", usernames);
+    };
+}, [username1, username2]);
+
 
   useEffect(() => {
     async function getUsernames(userId1, userId2) {
-      
+    
       if (userId1 !== null) { 
-        getUsername(socket.current, userId1);
+        getUsername(socket, userId1);
       }
       if (userId2 !== null) {
-        getUsername(socket.current, userId2);
+        getUsername(socket, userId2);
       }
     }
 
-    getUsernames(userId_1, userId_2);
+    getUsernames(userId1, userId2);
 
     const handleUsernameResponse = (resp) => {
       
-      if (resp.id === userId_1) {
+      if (resp.id === userId1) {
         setUsername1(resp.username);
       }
-      if (resp.id === userId_2) {
+      if (resp.id === userId2) {
         setUsername2(resp.username);
       }
     };
 
-    socket.current.on("getUsernamesResponse", handleUsernameResponse);
+    socket.on("getUsernamesResponse", handleUsernameResponse);
 
     return () => {
-      socket.current.off("getUsernamesResponse", handleUsernameResponse);
+      socket.off("getUsernamesResponse", handleUsernameResponse);
     };
-  }, [socketConnection]);
+  }, [socket]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -120,6 +148,12 @@ export default function Game() {
     setIsMyTurn(false);
   };
 
+  const handleLeave = async () => {
+    console.log("leave",socket, roomId, userId1)
+      await leaveRoom(socket, roomId, userId1)
+      navigate("/")
+    }
+
   return (
     <div className="game-container">
       {/* Player 1 Container */}
@@ -172,6 +206,9 @@ export default function Game() {
               Start Game
             </button>
           ) : null}
+          <button className="leave-button" onClick={handleLeave}>
+              Leave Game
+            </button>
         </div>
       </div>
 

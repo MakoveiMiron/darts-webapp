@@ -11,7 +11,7 @@ const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       {
-        path: "/game",
+        path: `/game/:roomId`,
         element: <Game />,
       },
       {

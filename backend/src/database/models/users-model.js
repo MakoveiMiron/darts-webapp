@@ -39,7 +39,24 @@ import {db} from '../connection';
         });
     }
 
-   function getUserDataById(id){
+   async function getUsernamesById(id1, id2){
+        console.log("2- ids",id1,id2)
+        let user1 = await getUserDataById(id1)
+        let user2 = await getUserDataById(id2)
+
+        console.log("users", user1, user2)
+        if(user1 !== undefined && user2 !== undefined){
+            return{username1: user1.username, username2: user2.username}
+        }
+        else if(user1 !== undefined && user2 === undefined){
+            return{username1: user1.username, username2: "No opponent"}
+        }
+        else{
+            return{username1: "No opponent", username2: user2.username}
+        }
+    }
+
+    function getUserDataById(id){
         const sql = `SELECT * FROM users WHERE id = ?`
         return new Promise((resolve,reject) => {
             db.get(sql,[id], (err, row) => {
@@ -50,6 +67,7 @@ import {db} from '../connection';
             });
         });
     }
+
    function createUser({email, passwordHash, username}){
         const id = nanoid(16)
         const sql = `INSERT INTO users (id,email,password_hash,username) VALUES($id,$email,$passwordHash,$username)`
@@ -87,5 +105,6 @@ import {db} from '../connection';
         getUserDataById,
         createUser,
         getEmail,
-        setIoUsers
+        setIoUsers,
+        getUsernamesById
     }
