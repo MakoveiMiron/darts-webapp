@@ -16,9 +16,13 @@ const updateRoomsList = async () => {
 
 const updateUserNamesForRoom = async (data) => {
   console.log("1-data",data)
-  const result = await getRoomUsersService({userId1: data.player1_id, userId2: data.player2_id})
-    io.to(data.socketId1).emit('userNamesUpdate', result);
-    io.to(data.socketId2).emit('userNamesUpdate', result);
+  const result = await getRoomUsersService({myId: data.player1_id, opponentId: data.player2_id})
+   
+      io.to(data.socketId1).emit('userNamesUpdate', result);
+    
+    
+      io.to(data.socketId2).emit('userNamesUpdate', result);
+    
 };
 
 io.on('connection', (socket) => {
@@ -47,10 +51,10 @@ io.on('connection', (socket) => {
 
   socket.on('leaveRoom', async (data) => {
     console.log("leaveroom",data)
-    const updatedUsernames = await getGameRoomDataService(data.roomId);
-    updateUserNamesForRoom(updatedUsernames)
     const result = await leaveGameRoomService({userId: data.userId, roomId: data.roomId, socketId: data.socketId})
     .catch(err => socket.emit('leaveRoomResponse', err));
+    const updatedUsernames = await getGameRoomDataService(data.roomId);
+    updateUserNamesForRoom(updatedUsernames)
     updateRoomsList();
     socket.emit('leaveRoomResponse', result)
   });
@@ -82,13 +86,19 @@ io.on('connection', (socket) => {
   })
 
   socket.on('getUsernames', async (data) => {
-    const result = await getRoomUsersService({userId1: data.userId1, userId2: data.userId2})
-    io.to(data.socketId1).to(socketId2).emit("userNamesResponse",result)
+    const result = await getRoomUsersService({myId: data.myId, opponentId: data.opponentId})
+    updateUserNamesForRoom({player1_id: data.myId, player2_id: data.opponentId, socketId1: data.socketId1, socketId2: data.socketId2})
+    io.to(data.socketId1).to(data.socketId2).emit("userNamesResponse",result)
   })
 
   socket.on('getUsername', async (data) => {
     const result = await getUserDataByIdService({userId1: data.userId1})
     socket.emit('getUsernameResponse', result)
+  })
+
+  socket.on('getRoomData', async (roomId) => {
+    const result = await getGameRoomDataService(roomId)
+    socket.emit('getRoomDataResponse', result)
   })
 
 });

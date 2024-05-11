@@ -39,20 +39,20 @@ import {db} from '../connection';
         });
     }
 
-   async function getUsernamesById(id1, id2){
-        console.log("2- ids",id1,id2)
-        let user1 = await getUserDataById(id1)
-        let user2 = await getUserDataById(id2)
+   async function getUsernamesById(myId, opponentId){
+        console.log("2- ids",myId,opponentId)
+        let user1 = await getUserDataById(myId)
+        let user2 = await getUserDataById(opponentId)
 
         console.log("users", user1, user2)
         if(user1 !== undefined && user2 !== undefined){
-            return{username1: user1.username, username2: user2.username}
+            return{user1: {username1: user1?.username , user1Id: myId}, user2: {username2: user2?.username, user2Id: opponentId}}
         }
         else if(user1 !== undefined && user2 === undefined){
-            return{username1: user1.username, username2: "No opponent"}
+            return{user1: {username1: user1?.username, user1Id: myId}, user2: {username2: "No opponent", user2Id: opponentId}}
         }
         else{
-            return{username1: "No opponent", username2: user2.username}
+            return{user1: {username1: "No opponent" , user1Id: myId}, user2: {username2: user2?.username, user2Id: opponentId}}
         }
     }
 

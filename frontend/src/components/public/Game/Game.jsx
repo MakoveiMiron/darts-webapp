@@ -1,15 +1,18 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Game.css"; // Import your CSS file
-import { getUsername, getUsernames, leaveRoom } from "../../../../utils/socketCalls";
-import { useLocation } from "react-router-dom";
+import { leaveRoom, getUsernames, getRoomData } from "../../../../utils/socketCalls";
 import { WebSocketContext } from "../../../contexts/Webprovider";
-
+import useAuth from '../../../hooks/useAuth';
 export default function Game() {
   const location = useLocation();
-  const { userId1, userId2, roomId } = location.state || {};
+  const { user } = useAuth()
   const navigate = useNavigate()
+  const roomId = ((location.pathname).split("/"))[2] 
+  const socket = useContext(WebSocketContext);
 
+  const [myId, setMyId] = useState(user?.id)
+  const [opponentId, setOpponentId] = useState("")
   const [currentPlayer, setCurrentPlayer] = useState("Player 1");
   const [currentSet, setCurrentSet] = useState(1);
   const [currentLeg, setCurrentLeg] = useState(1);
@@ -20,69 +23,53 @@ export default function Game() {
   const [opponentTime, setOpponentTime] = useState(10);
   const [enteredScore, setEnteredScore] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
-  const [username1, setUsername1] = useState("");
-  const [username2, setUsername2] = useState("");
-  // const [userId_1, setUserId1] = useState(userId1);
-  // const [userId_2, setUserId2] = useState(userId2);
-
-  const socket = useContext(WebSocketContext);
+  const [myName, setMyName] = useState("");
+  const [opponentName, setOpponentName] = useState("");
 
 
-
-  //updating useeffect
   useEffect(() => {
+    
+    getRoomData(socket, roomId)
+
     const handleUserNamesUpdate = async (resp) => {
-        const updatedUsernames = await resp
-        console.log("updated",updatedUsernames)
-        //getUsernames(socket, updatedUsernames.player1_id, updatedUsernames.player2_id, updatedUsernames.socketid1, updatedUsernames.socketId2);
-        setUsername1(updatedUsernames.username1)
-        setUsername2(updatedUsernames.username2)
+      const updatedUsernames = await resp
+      console.log("updated",updatedUsernames)
+      if(updatedUsernames.user1.user1Id === myId){
+        setMyName(updatedUsernames.user1.username1)
+        setOpponentName(updatedUsernames.user2.username2)
+        }
+        else{
+          setMyName(updatedUsernames.user2.username2)
+          setOpponentName(updatedUsernames.user1.username1)
+        }
       };
       
-      // const usernames = (resp) => {
-      //   setUsername1(resp.username1);
-      //   setUsername2(resp.username2);
-      // }
-
+      const handleRoomDataResponse = async (resp) => {
+        console.log("resp:",resp)
+        console.log(`${myId} \n ${opponentId} \n ${resp.socketId1} \n ${resp.socketId2}`)
+          if(myId === resp.player1_id){
+            console.log("1 set")
+            setOpponentId(resp.player2_id)
+            console.log(myId)
+            getUsernames(socket, myId, resp.player2_id, resp.socketId1, resp.socketId2)
+          }
+          if(myId === resp.player2_id){
+            console.log("2 set")
+            setOpponentId(resp.player1_id)
+            console.log(myId)
+            getUsernames(socket, myId, resp.player1_id, resp.socketId1, resp.socketId2)
+          }
+      }
+      
     socket.on('userNamesUpdate', handleUserNamesUpdate);
-    //socket.on("getUsernamesResponse", usernames);
+    socket.on('getRoomDataResponse', handleRoomDataResponse)    
 
     return () => {
         socket.off('userNamesUpdate', handleUserNamesUpdate);
-        //socket.off("getUsernamesResponse", usernames);
+        socket.off('getRoomDataResponse', handleRoomDataResponse)
+        
     };
-}, [username1, username2]);
-
-
-  useEffect(() => {
-    async function getUsernames(userId1, userId2) {
-    
-      if (userId1 !== null) { 
-        getUsername(socket, userId1);
-      }
-      if (userId2 !== null) {
-        getUsername(socket, userId2);
-      }
-    }
-
-    getUsernames(userId1, userId2);
-
-    const handleUsernameResponse = (resp) => {
-      
-      if (resp.id === userId1) {
-        setUsername1(resp.username);
-      }
-      if (resp.id === userId2) {
-        setUsername2(resp.username);
-      }
-    };
-
-    socket.on("getUsernamesResponse", handleUsernameResponse);
-
-    return () => {
-      socket.off("getUsernamesResponse", handleUsernameResponse);
-    };
-  }, [socket]);
+}, [myName, opponentName]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -149,9 +136,9 @@ export default function Game() {
   };
 
   const handleLeave = async () => {
-    console.log("leave",socket, roomId, userId1)
-      await leaveRoom(socket, roomId, userId1)
-      navigate("/")
+    console.log("leave",socket, roomId, myId)
+      await leaveRoom(socket, roomId, myId)
+      navigate("/", { replace: true})
     }
 
   return (
@@ -159,7 +146,7 @@ export default function Game() {
       {/* Player 1 Container */}
       <div className="player-container">
         <div className="player-info">
-          <p className="player-text">{username1}</p>
+          <p className="player-text">{myName}</p>
           <p className={`score-text ${player1Score < 100 && "low-score"}`}>
             {player1Score}
           </p>
@@ -215,7 +202,7 @@ export default function Game() {
       {/* Player 2 Container */}
       <div className="player-container">
         <div className="player-info">
-          <p className="player-text">{username2}</p>
+          <p className="player-text">{opponentName}</p>
           <p className={`score-text ${player2Score < 100 && "low-score"}`}>
             {player2Score}
           </p>

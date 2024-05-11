@@ -42,10 +42,14 @@ export function getGameRooms(socket) {
   socket.emit("getGameRooms")
 }
 
-export function getUsernames(socket, userId1, userId2, socketId1, socketId2){
-  socket.emit('getUsernames', { userId1: userId1, userId2: userId2, socketId1: socketId1, socketId2: socketId2 })
+export function getUsernames(socket, myId, opponentId, socketId1, socketId2){
+  socket.emit('getUsernames', { myId: myId, opponentId: opponentId, socketId1: socketId1, socketId2: socketId2 })
 }
 
 export function getUsername(socket, userId){
   socket.emit('getUsername', { userId: userId })
+}
+
+export function getRoomData(socket, roomId){
+  socket.emit('getRoomData', roomId)
 }

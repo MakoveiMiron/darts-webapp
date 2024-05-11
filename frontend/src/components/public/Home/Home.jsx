@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { getGameRooms, joinRoom } from "../../../../utils/socketCalls";
 import "./Home.css";
 import useAuth from '../../../hooks/useAuth';
+import { useLocation } from "react-router-dom";
 
 export default function Home() {
   const navigate = useNavigate();
   const [roomsList, setRoomsList] = useState([]);
   const socket = useContext(WebSocketContext);
-
 
   const { user } = useAuth()
   const userId = user?.id
@@ -38,7 +38,7 @@ export default function Home() {
     const handleJoinRoomResponse = (resp) => {
       console.log("2", resp)
       navigate(`/game/${resp.id}`, {
-        state: { userId1: resp.player1_id, userId2: resp.player2_id, roomId: resp.id },
+        state: { userId1: resp.player1_id, userId2: resp.player2_id, roomId: resp.id}
       });
     };
 

@@ -5,7 +5,7 @@ import { createUser, getUserDataById, getUsernamesById} from "../database/models
         return createUser(payload);
     }
     export function getRoomUsersService(payload){
-        return getUsernamesById(payload.userId1, payload.userId2)
+        return getUsernamesById(payload.myId, payload.opponentId)
     }
     export function getUserDataByIdService(payload){
         return getUserDataById(payload)
