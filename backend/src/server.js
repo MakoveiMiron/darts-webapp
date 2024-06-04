@@ -1,7 +1,7 @@
 import initDb from "./database/init";
 import { FRONTEND_URL, IO_PORT, HTTP_PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, getGameRoomDataService, leaveGameRoomService, getGameRoomsService } from "./services/games-service";
+import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, getGameRoomDataService, leaveGameRoomService, getGameRoomsService, joinedToRoomService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
 import app from "./app";
 import { getUserDataByIdService, getRoomUsersService } from "./services/users-service";
@@ -99,6 +99,13 @@ io.on('connection', (socket) => {
   socket.on('getRoomData', async (roomId) => {
     const result = await getGameRoomDataService(roomId)
     socket.emit('getRoomDataResponse', result)
+  })
+
+  socket.on('joinedToRoom', async (data) => {
+    console.log("dataaaaaaaa",data)
+    const result = await joinedToRoomService({userId:data.userId, roomId: data.roomId})
+    console.log("asdadadasd",result)
+    socket.emit('joinedToRoomResponse', result)
   })
 
 });

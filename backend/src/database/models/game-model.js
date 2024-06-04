@@ -75,7 +75,7 @@ import {db} from "../connection";
         return new Promise((resolve, reject) => {
           db.get(checkIdSql, [roomId], async (err, row) => {
             const currentRoomId = await getCurrentRoom(userId);
-            if(currentRoomId !== undefined){
+            if(currentRoomId !== undefined && currentRoomId !== roomId){
               await leaveGameRoom(currentRoomId, userId, socketId);
             }
       
@@ -88,7 +88,7 @@ import {db} from "../connection";
               const joinSql = `UPDATE games SET player1_id = ?, socketId1 = ? WHERE id = ?`;
               db.run(joinSql, [userId, socketId, roomId], function (joinErr) {
                 if (joinErr) {
-                  reject(`You are already in a room!`);
+                  resolve(`You are already in a room!`);
                 } else {
                   // Fetch the updated row after the update operation
                   const updatedRowSql = `SELECT * FROM games WHERE id = ?`;
@@ -123,7 +123,7 @@ import {db} from "../connection";
                 }
               });
             } else {
-              reject('You are already joined to this room!');
+              resolve('You are already joined to this room!');
             }
           });
         });
@@ -219,6 +219,31 @@ import {db} from "../connection";
       })
     }
 
+    function joinedToRoom(userId, roomId){
+      console.log("fthifthéos",userId, roomId)
+      const sql = `
+          SELECT * FROM games
+          WHERE
+          (player1_id = ? OR player2_id = ?) AND
+          id = ?`;
+      
+      return new Promise((resolve, reject) => {
+          db.get(sql, [userId, userId, roomId], (err, row) => {
+              if (err) {
+                  reject(err);
+              } else {
+                console.log("rooooooooooooooow",row)
+                  if (row) {
+                    console.log("true")
+                      resolve(true); 
+                  } else {
+                      resolve(false); 
+                  }
+              }
+          });
+      });
+  }
+
 
     export {
       createGameRoom,
@@ -229,6 +254,7 @@ import {db} from "../connection";
       setIoGames,
       startGame,
       getGameRooms,
-      getGameRoom
+      getGameRoom,
+      joinedToRoom
     }
     

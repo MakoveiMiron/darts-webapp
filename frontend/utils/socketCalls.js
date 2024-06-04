@@ -53,3 +53,7 @@ export function getUsername(socket, userId){
 export function getRoomData(socket, roomId){
   socket.emit('getRoomData', roomId)
 }
+
+export function joinedToRoom(socket, userId, roomId){
+  socket.emit('joinedToRoom', {userId: userId, roomId: roomId})
+}
