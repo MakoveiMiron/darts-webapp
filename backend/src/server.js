@@ -1,7 +1,7 @@
 import initDb from "./database/init";
 import { FRONTEND_URL, IO_PORT, HTTP_PORT } from "./constants";
 import { server, io } from "./database/connection";
-import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, getGameRoomDataService, leaveGameRoomService, getGameRoomsService, joinedToRoomService } from "./services/games-service";
+import { createGameRoomService, startGameService, deleteGameRoomService, joinGameRoomService, getGameRoomDataService, leaveGameRoomService, getGameRoomsService, joinedToRoomService, timerDownService, resetTimerService } from "./services/games-service";
 import { isRoomFull } from "./utils/isRoomFull";
 import app from "./app";
 import { getUserDataByIdService, getRoomUsersService } from "./services/users-service";
@@ -107,6 +107,24 @@ io.on('connection', (socket) => {
     console.log("asdadadasd",result)
     socket.emit('joinedToRoomResponse', result)
   })
+
+  socket.on('timerDown', async (data) => {
+    const result = await timerDownService({roomId: data.roomId})
+    io.to(data.socketId1).emit('timerDownResponse', result);
+    io.to(data.socketId2).emit('timerDownResponse', result);
+  })
+
+  socket.on('resetTimer', async (data) => {
+    const result = await resetTimerService({roomId: data.roomId})
+    io.to(data.socketId1).emit('resetTimerResponse', result);
+    io.to(data.socketId2).emit('resetTimerResponse', result);
+  })
+
+  socket.on('uploadAvatar', upload.single('avatar'), async (data) => {
+    const { userId, avatarPath } = data;
+    const result = await updateUserAvatarService({ userId, avatarPath });
+    io.emit('avatarUpdated', result);
+  });
 
 });
 

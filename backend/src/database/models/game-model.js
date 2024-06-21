@@ -18,6 +18,7 @@ import {db} from "../connection";
             legs_count INTEGER DEFAULT 0,
             current_leg INTEGER DEFAULT 0,
             current_set INTEGER DEFAULT 0,
+            timer INTEGER DEFAULT 10,
             game_mode INTEGER DEFAULT 0,
             socketId1 TEXT,
             socketId2 TEXT,
@@ -242,7 +243,36 @@ import {db} from "../connection";
               }
           });
       });
-  }
+    }
+
+    function timerDown(roomId){
+      const getSQL = `SELECT timer FROM games WHERE id = ?`;
+      const updateSQL = `UPDATE games SET timer = timer - 1 WHERE id = ?`
+
+      return new Promise((resolve, reject) => {
+        db.get(getSQL, [roomId], (err,row) => {
+          if(err) reject(err)
+          else{
+            db.run(updateSQL, [roomId], (err) => {
+              if(err) reject(err)
+            })
+            resolve(row.timer - 1)
+          }
+        })
+      })
+    }
+
+    function resetTimer(roomId){
+      const updateSQL = `UPDATE games SET timer = 10 WHERE id = ?`
+      return new Promise((resolve, reject) => {
+        db.run(updateSQL, [roomId], (err) => {
+          if(err) reject(err)
+          else{
+            resolve(10)
+          }
+        })
+      })
+    }
 
 
     export {
@@ -255,6 +285,8 @@ import {db} from "../connection";
       startGame,
       getGameRooms,
       getGameRoom,
-      joinedToRoom
+      joinedToRoom,
+      timerDown,
+      resetTimer
     }
     

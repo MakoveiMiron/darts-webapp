@@ -57,3 +57,11 @@ export function getRoomData(socket, roomId){
 export function joinedToRoom(socket, userId, roomId){
   socket.emit('joinedToRoom', {userId: userId, roomId: roomId})
 }
+
+export function timerDown(socket, roomId, socketId1, socketId2){
+  socket.emit('timerDown',{ roomId: roomId, socketId1: socketId1, socketId2: socketId2 })
+}
+
+export function resetTimer(socket, roomId, socketId1, socketId2){
+  socket.emit('resetTimer', { roomId: roomId, socketId1: socketId1, socketId2: socketId2 })
+}

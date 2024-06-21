@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Game.css"; // Import your CSS file
-import { leaveRoom, getUsernames, getRoomData } from "../../../../utils/socketCalls";
+import { leaveRoom, getUsernames, getRoomData, timerDown, resetTimer } from "../../../../utils/socketCalls";
 import { WebSocketContext } from "../../../contexts/Webprovider";
 import useAuth from '../../../hooks/useAuth';
 export default function Game() {
@@ -25,11 +25,11 @@ export default function Game() {
   const [gameStarted, setGameStarted] = useState(false);
   const [myName, setMyName] = useState("");
   const [opponentName, setOpponentName] = useState("");
+  const [socketId1, setSocketId1] = useState("")
+  const [socketId2, setSocketId2] = useState("")
 
 
   useEffect(() => {
-    
-    getRoomData(socket, roomId)
 
     const handleUserNamesUpdate = async (resp) => {
       const updatedUsernames = await resp
@@ -48,18 +48,30 @@ export default function Game() {
         console.log("resp:",resp)
         console.log(`${myId} \n ${opponentId} \n ${resp.socketId1} \n ${resp.socketId2}`)
           if(myId === resp.player1_id){
+            setSocketId1(resp.socketId1)
+            setSocketId2(resp.socketId2)
+            setCurrentLeg(resp.legs_count)
+            setCurrentSet(resp.sets_count)
+            setCountdown(resp.timer)
             console.log("1 set")
             setOpponentId(resp.player2_id)
             console.log(myId)
             getUsernames(socket, myId, resp.player2_id, resp.socketId1, resp.socketId2)
           }
           if(myId === resp.player2_id){
+            setSocketId1(resp.socketId1)
+            setSocketId2(resp.socketId2)
+            setCurrentLeg(resp.legs_count)
+            setCurrentSet(resp.sets_count)
+            setCountdown(resp.timer)
             console.log("2 set")
             setOpponentId(resp.player1_id)
             console.log(myId)
             getUsernames(socket, myId, resp.player1_id, resp.socketId1, resp.socketId2)
           }
-      }
+      };
+
+      getRoomData(socket, roomId)
       
     socket.on('userNamesUpdate', handleUserNamesUpdate);
     socket.on('getRoomDataResponse', handleRoomDataResponse)    
@@ -96,32 +108,39 @@ export default function Game() {
   };
 
   useEffect(() => {
-    if (gameStarted) {
-      if (isMyTurn) {
-        const countdownInterval = setInterval(() => {
-          if (countdown > 0) {
-            setCountdown(countdown - 1);
-          } else {
-            handleCountdownEnd();
-          }
-        }, 1000);
-        return () => {
-          clearInterval(countdownInterval);
-        };
-      } else {
-        const opponentTimeInterval = setInterval(() => {
-          if (opponentTime > 0) {
-            setOpponentTime(opponentTime - 1);
-          } else if (opponentTime === 0) {
-            handleOpponentTurnEnd();
-          }
-        }, 1000);
-        return () => {
-          clearInterval(opponentTimeInterval);
-        };
+    
+      const timeoutId = setTimeout(async () => {
+        if(gameStarted){
+          await timerDown(socket, roomId, socketId1, socketId2)
+        }
+      },1500)
+
+
+    const handleTimerDownResponse = async (resp) =>{
+      let timerValue = resp
+      setCountdown(timerValue)
+      if(countdown <= 0){
+        clearTimeout(timeoutId)
+        await resetTimer(socket, roomId, socketId1, socketId2)
       }
     }
-  }, [countdown, isMyTurn, opponentTime, gameStarted]);
+
+    const handleResetTimerResponse = (resp) => {
+      let timerValue = resp
+      clearTimeout(timeoutId)
+      setCountdown(timerValue)
+    }
+
+    socket.on('timerDownResponse', handleTimerDownResponse)
+    socket.on('resetTimerResponse', handleResetTimerResponse)
+    return () => {
+      socket.off('timerDownResponse', handleTimerDownResponse);
+      socket.off('resetTimerResponse', handleResetTimerResponse);  
+  };
+
+  }, [countdown, gameStarted]);
+
+
 
   const handleOpponentTurnEnd = () => {
     setIsMyTurn(true);
@@ -164,7 +183,7 @@ export default function Game() {
           <input
             className="input"
             placeholder="Enter Score"
-            type="text"
+            type="number"
             value={enteredScore}
             onChange={(e) => setEnteredScore(e.target.value)}
           />
@@ -188,7 +207,7 @@ export default function Game() {
         </div>
 
         <div className="start-game-container">
-          {gameStarted || isMyTurn ? (
+          {gameStarted === false ? (
             <button className="game-button" onClick={startGame}>
               Start Game
             </button>
