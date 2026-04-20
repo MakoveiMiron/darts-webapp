@@ -1,92 +1,209 @@
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    margin: 0;
-  }
-  
+.game-container {
+  width: min(1120px, calc(100% - 24px));
+  min-height: calc(100vh - 120px);
+  margin: 24px auto 40px;
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 420px) 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.player-container,
+.actions-container {
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 28px;
+  box-shadow: 0 22px 60px rgba(2, 8, 23, 0.3);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.player-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.player-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 35%);
+  pointer-events: none;
+}
+
+.player-container:first-of-type {
+  background:
+    radial-gradient(circle at top left, rgba(239, 68, 68, 0.22), transparent 36%),
+    rgba(15, 23, 42, 0.76);
+}
+
+.player-container:last-of-type {
+  background:
+    radial-gradient(circle at top right, rgba(34, 197, 94, 0.22), transparent 36%),
+    rgba(15, 23, 42, 0.76);
+}
+
+.player-info {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.player-text {
+  margin: 0 0 12px;
+  font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+  font-weight: 700;
+  color: #cbd8e8;
+}
+
+.score-text {
+  margin: 0;
+  font-size: clamp(4rem, 10vw, 7rem);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: #f8fbff;
+}
+
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 28px;
+}
+
+.indicator-container,
+.countdown-container,
+.start-game-container {
+  text-align: center;
+}
+
+.indicator-container {
+  margin-bottom: 24px;
+}
+
+.indicator-text {
+  margin: 0;
+  color: #dbe6f3;
+  font-weight: 700;
+}
+
+.indicator-text + .indicator-text {
+  margin-top: 8px;
+  color: #9fb0c7;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fbff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.input:focus {
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.game-button,
+.leave-button {
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 16px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+.game-button {
+  margin-bottom: 12px;
+  color: #04110a;
+  background: linear-gradient(135deg, #22c55e, #86efac);
+  box-shadow: 0 14px 30px rgba(34, 197, 94, 0.24);
+}
+
+.game-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(34, 197, 94, 0.3);
+  filter: brightness(1.02);
+}
+
+.game-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.leave-button {
+  color: #ffe8e8;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.24);
+}
+
+.leave-button:hover {
+  transform: translateY(-1px);
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.countdown-container {
+  margin: 10px 0 20px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.countdown-text,
+.opponent-time-text {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #dbe6f3;
+  font-weight: 600;
+}
+
+.low-score {
+  color: #f87171;
+}
+
+@media (max-width: 960px) {
   .game-container {
-    display: flex;
-    height: 100vh;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    min-height: auto;
   }
-  
-  .player-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #3498db;
-  }
-  
-  .player-info {
-    text-align: center;
-  }
-  
-  .player-text {
-    font-size: 24px;
-    color: #fff;
-  }
-  
-  .score-text {
-    font-size: 36px;
-    color: #fff;
-  }
-  
+
+  .player-container,
   .actions-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    min-height: 220px;
   }
-  
-  .indicator-container {
-    text-align: center;
-    margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .game-container {
+    width: calc(100% - 16px);
+    margin-top: 18px;
   }
-  
-  .input {
-    width: 200px;
-    padding: 8px;
-    margin-bottom: 10px;
+
+  .actions-container {
+    padding: 22px 18px;
   }
-  
-  .game-button {
-    background-color: #2ecc71;
-    color: #fff;
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 18px;
-    margin-bottom: 10px;
+
+  .score-text {
+    font-size: 4rem;
   }
-  
-  .game-button:hover {
-    background-color: #27ae60;
-  }
-  
-  .countdown-container,
-  .opponent-time-container,
-  .start-game-container {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .countdown-text,
-  .opponent-time-text {
-    font-size: 18px;
-  }
-  
-  .player1 {
-    background-color: #e74c3c;
-  }
-  
-  .player2 {
-    background-color: #2ecc71;
-  }
-  
-  .low-score {
-    color: #e74c3c;
-  }
-  
+}
